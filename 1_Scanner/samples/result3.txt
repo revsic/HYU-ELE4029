@@ -1,0 +1,57 @@
+C-MINUS COMPILATION: samples/test3.cm
+   1: void main(void)
+	1: reserved word: void
+	1: ID, name= main
+	1: (
+	1: reserved word: void
+	1: )
+   2: {
+	2: {
+   3: 	int i; int j;
+	3: reserved word: int
+	3: ID, name= i
+	3: ;
+	3: reserved word: int
+	3: ID, name= j
+	3: ;
+   4:     i = input();
+	4: ID, name= i
+	4: =
+	4: ID, name= input
+	4: (
+	4: )
+	4: ;
+   5:     j = input();
+	5: ID, name= j
+	5: =
+	5: ID, name= input
+	5: (
+	5: )
+	5: ;
+   6:     output(i + j);
+	6: ID, name= output
+	6: (
+	6: ID, name= i
+	6: +
+	6: ID, name= j
+	6: )
+	6: ;
+   7:     output(i >= j);
+	7: ID, name= output
+	7: (
+	7: ID, name= i
+	7: >=
+	7: ID, name= j
+	7: )
+	7: ;
+   8:     output(i > j);
+	8: ID, name= output
+	8: (
+	8: ID, name= i
+	8: >
+	8: ID, name= j
+	8: )
+	8: ;
+   9: }
+	9: }
+	10: EOF

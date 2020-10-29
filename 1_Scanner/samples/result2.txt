@@ -1,0 +1,97 @@
+C-MINUS COMPILATION: samples/test2.cm
+   1: void main(void)
+	1: reserved word: void
+	1: ID, name= main
+	1: (
+	1: reserved word: void
+	1: )
+   2: {
+	2: {
+   3: 	int i; int x[5];
+	3: reserved word: int
+	3: ID, name= i
+	3: ;
+	3: reserved word: int
+	3: ID, name= x
+	3: [
+	3: NUM, val= 5
+	3: ]
+	3: ;
+   4: 	
+   5: 	i = 0;
+	5: ID, name= i
+	5: =
+	5: NUM, val= 0
+	5: ;
+   6: 	while( i < 5 )
+	6: reserved word: while
+	6: (
+	6: ID, name= i
+	6: <
+	6: NUM, val= 5
+	6: )
+   7: 	{
+	7: {
+   8: 		x[i] = input();
+	8: ID, name= x
+	8: [
+	8: ID, name= i
+	8: ]
+	8: =
+	8: ID, name= input
+	8: (
+	8: )
+	8: ;
+   9: 
+  10: 		i = i + 1;
+	10: ID, name= i
+	10: =
+	10: ID, name= i
+	10: +
+	10: NUM, val= 1
+	10: ;
+  11: 	}
+	11: }
+  12: 
+  13: 	i = 0;
+	13: ID, name= i
+	13: =
+	13: NUM, val= 0
+	13: ;
+  14: 	while( i <= 4 )
+	14: reserved word: while
+	14: (
+	14: ID, name= i
+	14: <=
+	14: NUM, val= 4
+	14: )
+  15: 	{
+	15: {
+  16: 		if( x[i] != 0 )
+	16: reserved word: if
+	16: (
+	16: ID, name= x
+	16: [
+	16: ID, name= i
+	16: ]
+	16: !=
+	16: NUM, val= 0
+	16: )
+  17: 		{
+	17: {
+  18: 			output(x[i]);
+	18: ID, name= output
+	18: (
+	18: ID, name= x
+	18: [
+	18: ID, name= i
+	18: ]
+	18: )
+	18: ;
+  19: 		}
+	19: }
+  20: 	}
+	20: }
+  21: }
+	21: }
+	22: EOF
