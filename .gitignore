@@ -1,6 +1,9 @@
 # object
 *.o
 
+# lexer
+lex.yy.c
+
 # executable
 scanner_cimpl
 scanner_flex
