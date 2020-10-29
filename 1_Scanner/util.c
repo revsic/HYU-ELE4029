@@ -16,7 +16,7 @@ void printToken( TokenType token, const char* tokenString )
 { switch (token)
   { case IF:
     case ELSE:
-    case WRITE:
+    case WHILE:
     case RETURN:
     case INT:
     case VOID:
@@ -33,7 +33,7 @@ void printToken( TokenType token, const char* tokenString )
     case LPAREN: fprintf(listing,"(\n"); break;
     case RPAREN: fprintf(listing,")\n"); break;
     case LBRACE: fprintf(listing, "[\n"); break;
-    case RBACE: fprintf(listing, "]\n"); break;
+    case RBRACE: fprintf(listing, "]\n"); break;
     case LCURLY: fprintf(listing, "{\n"); break;
     case RCURLY: fprintf(listing, "}\n"); break;
     case SEMI: fprintf(listing,";\n"); break;
