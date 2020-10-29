@@ -25,12 +25,21 @@ void printToken( TokenType token, const char* tokenString )
       fprintf(listing,
          "reserved word: %s\n",tokenString);
       break;
-    case ASSIGN: fprintf(listing,":=\n"); break;
+    case ASSIGN: fprintf(listing,"=\n"); break;
+    case EQ: fprintf(listing,"==\n"); break;
+    case NE: fprintf(listing,"!=\n"); break;
     case LT: fprintf(listing,"<\n"); break;
-    case EQ: fprintf(listing,"=\n"); break;
+    case LE: fprintf(listing, "<=\n"); break;
+    case GT: fprintf(listing, ">\n"); break;
+    case GE: fprintf(listing, ">=\n"); break;
     case LPAREN: fprintf(listing,"(\n"); break;
     case RPAREN: fprintf(listing,")\n"); break;
+    case LBRACE: fprintf(listing, "[\n"); break;
+    case RBACE: fprintf(listing, "]\n"); break;
+    case LCURLY: fprintf(listing, "{\n"); break;
+    case RCURLY: fprintf(listing, "}\n"); break;
     case SEMI: fprintf(listing,";\n"); break;
+    case COMMA: fprintf(listing, ",\n"); break;
     case PLUS: fprintf(listing,"+\n"); break;
     case MINUS: fprintf(listing,"-\n"); break;
     case TIMES: fprintf(listing,"*\n"); break;
