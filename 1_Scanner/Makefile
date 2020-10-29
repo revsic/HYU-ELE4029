@@ -2,19 +2,19 @@ CC = gcc
 CFLAGS = 
 
 OBJS = main.o util.o scan.o
-# OBJS_FLEX = main.o util.o lex.yy.o parse.o symtab.o analyze.o code.o cgen.o
+OBJS_FLEX = main.o util.o lex.yy.o
 
 .PHONY: all scanner_cimpl scanner_flex $(OBJS) $(OBJS_FLEX) lex.yy.c
 
-all: scanner_cimpl # scanner_flex
+all: scanner_cimpl scanner_flex
 
 scanner_cimpl: $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $@
 
-# scanner_flex: $(OBJS_FLEX)
-# 	$(CC) $(CFLAGS) $(OBJS_FLEX) -o $@ -lfl
+scanner_flex: $(OBJS_FLEX)
+	$(CC) $(CFLAGS) $(OBJS_FLEX) -o $@ -lfl
 
-lex.yy.o: cminus.l
+lex.yy.o: ./lex/cminus.l
 	flex $^
 	$(CC) $(CFLAGS) -c lex.yy.c
 
