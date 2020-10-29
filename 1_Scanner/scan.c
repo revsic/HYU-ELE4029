@@ -180,7 +180,7 @@ TokenType getToken(void)
            currentToken = ENDFILE;
          }
          else if (c == '/') state = START;
-         else state = INCOMMENT;
+         else if (c != '*') state = INCOMMENT;
          break;
        case INOVER:
          if (c == '*')
