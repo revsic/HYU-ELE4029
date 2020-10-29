@@ -98,9 +98,9 @@ TokenType getToken(void)
          else if (c == '!')
            state = INNE;
          else if (c == '<')
-           state = INGT;
-         else if (c == '>')
            state = INLT;
+         else if (c == '>')
+           state = INGT;
          else if (c == '/')
          { save = FALSE;
            state = INOVER;
