@@ -188,7 +188,7 @@ TokenType getToken(void)
          }
          else
          { state = DONE;
-           ungetNextchar();
+           ungetNextChar();
            currentToken = OVER;
            c = '/';
          }
@@ -210,7 +210,7 @@ TokenType getToken(void)
            currentToken = NE;
          else
          { ungetNextChar();
-           save = False;
+           save = FALSE;
            currentToken = ERROR;
          }
          break;
@@ -220,7 +220,7 @@ TokenType getToken(void)
            currentToken = GE;
          else
          { ungetNextChar();
-           save = False;
+           save = FALSE;
            currentToken = GT;
          }
          break;
@@ -230,7 +230,7 @@ TokenType getToken(void)
            currentToken = LE;
          else
          { ungetNextChar();
-           save = False;
+           save = FALSE;
            currentToken = LT;
          }
          break;
