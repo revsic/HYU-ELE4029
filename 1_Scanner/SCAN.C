@@ -93,14 +93,20 @@ TokenType getToken(void)
            state = INNUM;
          else if (isalpha(c))
            state = INID;
-         else if (c == ':')
-           state = INASSIGN;
+         else if (c == '=')
+           state = INEQ;
+         else if (c == '!')
+           state = INNE;
+         else if (c == '<')
+           state = INGT;
+         else if (c == '>')
+           state = INLT;
+         else if (c == '/')
+         { save = FALSE;
+           state = INOVER;
+         }
          else if ((c == ' ') || (c == '\t') || (c == '\n'))
            save = FALSE;
-         else if (c == '{')
-         { save = FALSE;
-           state = INCOMMENT;
-         }
          else
          { state = DONE;
            switch (c)
@@ -108,12 +114,15 @@ TokenType getToken(void)
                save = FALSE;
                currentToken = ENDFILE;
                break;
-             case '=':
-               currentToken = EQ;
-               break;
-             case '<':
-               currentToken = LT;
-               break;
+            //  case '=':
+            //    currentToken = ASSIGN;
+            //    break;
+            //  case '<':
+            //    currentToken = LT;
+            //    break;
+            //  case '>':
+            //    currentToken = GT;
+            //    break;
              case '+':
                currentToken = PLUS;
                break;
@@ -123,18 +132,32 @@ TokenType getToken(void)
              case '*':
                currentToken = TIMES;
                break;
-             case '/':
-               currentToken = OVER;
-               break;
+            //  case '/':
+            //    currentToken = OVER;
+            //    break;
              case '(':
                currentToken = LPAREN;
                break;
              case ')':
                currentToken = RPAREN;
                break;
+             case '{':
+               currentToken = LCURLY;
+               break;
+             case '}':
+               currentToken = RCURLY;
+               break;
+             case '[':
+               currentToken = LBRACE;
+               break;
+             case ']':
+               currentToken = RBRACE;
+               break;
              case ';':
                currentToken = SEMI;
                break;
+             case ',':
+               currentToken = COMMA;
              default:
                currentToken = ERROR;
                break;
@@ -147,17 +170,68 @@ TokenType getToken(void)
          { state = DONE;
            currentToken = ENDFILE;
          }
-         else if (c == '}') state = START;
+         else if (c == '*') state = INCOMMENT_;
          break;
-       case INASSIGN:
+       case INCOMMENT_:
+         save = FALSE;
+         if (c == EOF)
+         { state = DONE;
+           currentToken = ENDFILE;
+         }
+         else if (c == '/') state = START;
+         else state = INCOMMENT;
+         break;
+       case INOVER:
+         if (c == '*')
+         { save = FALSE;
+           state = INCOMMENT;
+         }
+         else
+         { state = DONE;
+           ungetNextchar();
+           currentToken = OVER;
+           c = '/';
+         }
+         break;
+       case INEQ:
          state = DONE;
          if (c == '=')
-           currentToken = ASSIGN;
+           currentToken = EQ;
          else
          { /* backup in the input */
            ungetNextChar();
            save = FALSE;
+           currentToken = ASSIGN;
+         }
+         break;
+       case INNE:
+         state = DONE;
+         if (c == '=')
+           currentToken = NE;
+         else
+         { ungetNextChar();
+           save = False;
            currentToken = ERROR;
+         }
+         break;
+       case INGT:
+         state = DONE;
+         if (c == '=')
+           currentToken = GE;
+         else
+         { ungetNextChar();
+           save = False;
+           currentToken = GT;
+         }
+         break;
+       case INLT:
+         state = DONE;
+         if (c == '=')
+           currentToken = LE;
+         else
+         { ungetNextChar();
+           save = False;
+           currentToken = LT;
          }
          break;
        case INNUM:
