@@ -9,6 +9,9 @@
 #include "globals.h"
 #include "util.h"
 #include "scan.h"
+
+#define YY_DECL int _yylex (void)
+
 /* lexeme of identifier or reserved word */
 char tokenString[MAXTOKENLEN+1];
 %}
@@ -74,7 +77,7 @@ TokenType getToken(void)
     yyin = source;
     yyout = listing;
   }
-  currentToken = yylex();
+  currentToken = _yylex();
   strncpy(tokenString,yytext,MAXTOKENLEN);
   if (TraceScan) {
     fprintf(listing,"\t%d: ",lineno);
