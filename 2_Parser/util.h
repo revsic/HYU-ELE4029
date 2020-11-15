@@ -13,6 +13,10 @@
  */
 void printToken( TokenType, const char* );
 
+/* Procedure printExpType prints a type
+ */
+void printExpType(ExpType);
+
 /* Function newDeclNode creates a new declaration
  * node for syntax tree construction
  */

@@ -61,6 +61,25 @@ void printToken( TokenType token, const char* tokenString )
   }
 }
 
+/* Procedure printExpType prints a type
+ */
+void printExpType(ExpType token)
+{ switch(token)
+  { case Void:
+      fprintf(listing,"void");
+      break;
+    case Integer:
+      fprintf(listing,"int");
+      break;
+    case Boolean:
+      fprintf(listing,"bool");
+      break;
+    default:
+      fprintf(listing,"unknown");
+      break;
+  }
+}
+
 /* Function newDeclNode creates a new declaration
  * node for syntax tree construction
  */
@@ -162,7 +181,7 @@ static void printSpaces(void)
  * listing file using indentation to indicate subtrees
  */
 void printTree( TreeNode * tree )
-{ int i;
+{ int i, flag = 1;
   INDENT;
   while (tree != NULL) {
     printSpaces();
@@ -170,9 +189,11 @@ void printTree( TreeNode * tree )
     { case DeclK:
         switch (tree->kind.decl) {
           case VarK:
-            fprintf(listing,"Var: %s",tree->attr.name);
+            fprintf(listing,"Var declaration, name : %s, type : ",tree->attr.name);
+            printExpType(tree->type);
             if (tree->child[0] != NULL) {
               fprintf(listing,"[%d]",tree->child[0]->attr.val);
+              flag = 0;
             }
             fprintf(listing,"\n");
             break;
@@ -225,8 +246,9 @@ void printTree( TreeNode * tree )
       default:
         fprintf(listing,"Unknown node kind\n");
     }
-    for (i=0;i<MAXCHILDREN;i++)
-         printTree(tree->child[i]);
+    if (flag)
+      for (i=0;i<MAXCHILDREN;i++)
+          printTree(tree->child[i]);
     tree = tree->sibling;
   }
   UNINDENT;
