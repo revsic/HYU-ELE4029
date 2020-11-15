@@ -18,6 +18,8 @@ static int savedNum;     /* for use in array assignments */
 static int savedLineNo;  /* ditto */
 static TreeNode * savedTree; /* stores syntax tree for later return */
 
+static int yylex(void);
+
 %}
 
 %token IF ELSE WHILE RETURN INT VOID
@@ -69,10 +71,10 @@ var_decl    : type_spec
                   free($1);
                 }
             ;
-type_spec   : INT { $$ = newExpNode(TypeK);
+type_spec   : INT { $$ = newExpNode(IdK);
                     $$->type = Integer; }
-            | VOID { $$ = newExpNode(TypeK);
-                     $$->type = void; }
+            | VOID { $$ = newExpNode(IdK);
+                     $$->type = Void; }
             ;
 fn_decl     : type_spec ID { savedName = copyString(tokenString);
                              savedLineNo = lineno; }
@@ -216,7 +218,7 @@ var         : ID
               LBRACE expr RBRACE
                 { $$ = newExpNode(IdK);
                   $$->attr.name = copyString(tokenString);
-                  $$->attr.child[0] = $4;
+                  $$->child[0] = $4;
                 }
             ;
 simple_expr : add_expr relop add_expr
