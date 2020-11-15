@@ -234,10 +234,10 @@ void printTree( TreeNode * tree )
             fprintf(listing,"\n");
             break;
           case WhileK:
-            fprintf(listing,"While\n");
+            fprintf(listing,"While (condition) (body)\n");
             break;
           case ReturnK:
-            fprintf(listing,"Return\n");
+            fprintf(listing,"Return : \n");
             break;
           default:
             fprintf(listing,"Unknown StmtNode kind\n");
@@ -247,14 +247,14 @@ void printTree( TreeNode * tree )
       case ExpK:
         switch (tree->kind.exp) {
           case AssignK:
-            fprintf(listing,"Assign to: %s\n",tree->attr.name);
+            fprintf(listing,"Assign : (destination) (source)\n");
             break;
           case OpK:
             fprintf(listing,"Op : ");
             printToken(tree->attr.op,"\0");
             break;
           case ConstK:
-            fprintf(listing,"Const: %d\n",tree->attr.val);
+            fprintf(listing,"Const : %d\n",tree->attr.val);
             break;
           case IdK:
             fprintf(listing,"Id : %s\n",tree->attr.name);
