@@ -1,0 +1,45 @@
+C-MINUS COMPILATION: samples/test2.cm
+
+Syntax tree:
+  Function declaration, name : main, return type: void
+    Single parameter, name : (null), type : void
+    Compund Statement :
+      Var declaration, name : i, type : int
+      Var declaration, name : x, type : int[5]
+      Assign : (destination) (source)
+        Id : i
+        Const : 0
+      While (condition) (body)
+        Op : <
+          Id : i
+          Const : 5
+        Compund Statement :
+          Assign : (destination) (source)
+            Id : x
+              Indexing : (expression)
+                Id : i
+            Call, name : input, with arguments below
+          Assign : (destination) (source)
+            Id : i
+            Op : +
+              Id : i
+              Const : 1
+      Assign : (destination) (source)
+        Id : i
+        Const : 0
+      While (condition) (body)
+        Op : <=
+          Id : i
+          Const : 4
+        Compund Statement :
+          If (condition) (body)
+            Op : !=
+              Id : x
+                Indexing : (expression)
+                  Id : i
+              Const : 0
+            Compund Statement :
+              Call, name : output, with arguments below
+                Id : x
+                  Indexing : (expression)
+                    Id : i

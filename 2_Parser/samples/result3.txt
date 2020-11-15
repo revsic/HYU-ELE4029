@@ -1,0 +1,28 @@
+C-MINUS COMPILATION: samples/test3.cm
+
+Syntax tree:
+  Var declaration, name : i, type : int
+  Var declaration, name : j, type : int[10]
+  Function declaration, name : main, return type: void
+    Single parameter, name : (null), type : void
+    Compund Statement :
+      Var declaration, name : i, type : int
+      Var declaration, name : j, type : int
+      Assign : (destination) (source)
+        Id : i
+        Call, name : input, with arguments below
+      Assign : (destination) (source)
+        Id : j
+        Call, name : input, with arguments below
+      Call, name : output, with arguments below
+        Op : +
+          Id : i
+          Id : j
+      Call, name : output, with arguments below
+        Op : >=
+          Id : i
+          Id : j
+      Call, name : output, with arguments below
+        Op : >
+          Id : i
+          Id : j

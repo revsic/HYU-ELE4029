@@ -1,0 +1,38 @@
+C-MINUS COMPILATION: samples/test.cm
+
+Syntax tree:
+  Function declaration, name : gcd, return type: int
+    Single parameter, name : u, type : int
+    Single parameter, name : v, type : int
+    Compund Statement :
+      If (condition) (body) (else)
+        Op : ==
+          Id : v
+          Const : 0
+        Return : 
+          Id : u
+        Return : 
+          Call, name : gcd, with arguments below
+            Id : v
+            Op : -
+              Id : u
+              Op : *
+                Op : /
+                  Id : u
+                  Id : v
+                Id : v
+  Function declaration, name : main, return type: void
+    Single parameter, name : (null), type : void
+    Compund Statement :
+      Var declaration, name : x, type : int
+      Var declaration, name : y, type : int
+      Assign : (destination) (source)
+        Id : x
+        Call, name : input, with arguments below
+      Assign : (destination) (source)
+        Id : y
+        Call, name : input, with arguments below
+      Call, name : output, with arguments below
+        Call, name : gcd, with arguments below
+          Id : x
+          Id : y
