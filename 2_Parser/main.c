@@ -45,7 +45,7 @@ int TraceCode = FALSE;
 
 int Error = FALSE;
 
-main( int argc, char * argv[] )
+int main( int argc, char * argv[] )
 { TreeNode * syntaxTree;
   char pgm[120]; /* source code file name */
   if (argc != 2)
@@ -61,7 +61,7 @@ main( int argc, char * argv[] )
     exit(1);
   }
   listing = stdout; /* send listing to screen */
-  fprintf(listing,"\C-MINUS COMPILATION: %s\n",pgm);
+  fprintf(listing,"C-MINUS COMPILATION: %s\n",pgm);
 #if NO_PARSE
   while (getToken()!=ENDFILE);
 #else
