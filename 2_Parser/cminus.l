@@ -13,7 +13,8 @@
 #define YY_DECL int _yylex (void)
 
 /* lexeme of identifier or reserved word */
-char tokenString[MAXTOKENLEN+1];
+int current;
+char tokenString[2][MAXTOKENLEN+1];
 %}
 
 digit       [0-9]
@@ -76,12 +77,14 @@ TokenType getToken(void)
     lineno++;
     yyin = source;
     yyout = listing;
+    current = 1;
   }
   currentToken = _yylex();
-  strncpy(tokenString,yytext,MAXTOKENLEN);
+  current = 1 - current;
+  strncpy(tokenString[current],yytext,MAXTOKENLEN);
   if (TraceScan) {
     fprintf(listing,"\t%d: ",lineno);
-    printToken(currentToken,tokenString);
+    printToken(currentToken,tokenString[current]);
   }
   return currentToken;
 }
