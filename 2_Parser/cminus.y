@@ -7,6 +7,9 @@
 %{
 #define YYPARSER /* distinguishes Yacc output from other code files */
 
+#include <stdio.h>
+#define DBG printf("%d\n", __LINE__);
+
 #include "globals.h"
 #include "util.h"
 #include "scan.h"
@@ -18,7 +21,7 @@ static int savedNum;     /* for use in array assignments */
 static int savedLineNo;  /* ditto */
 static TreeNode * savedTree; /* stores syntax tree for later return */
 
-static int yylex(void);
+int yylex(void);
 
 %}
 
@@ -49,7 +52,7 @@ decl        : var_decl { $$ = $1; }
             | fn_decl  { $$ = $1; }
             ;
 var_decl    : type_spec
-              ID { savedName = copyString(tokenString);
+              ID { savedName = copyString(tokenString[current]);
                    savedLineNo = lineno; }
               SEMI
                 { $$ = newDeclNode(VarK);
@@ -59,10 +62,10 @@ var_decl    : type_spec
                   free($1);
                 }
             | type_spec
-              ID { savedName = copyString(tokenString);
+              ID { savedName = copyString(tokenString[current]);
                    savedLineNo = lineno; }
               LBRACE
-              NUM { savedNum = atoi(tokenString); }
+              NUM { savedNum = atoi(tokenString[current]); }
               RBRACE SEMI
                 { $$ = newDeclNode(VarK);
                   $$->attr.array = arrayAttr(savedName, savedNum);
@@ -76,7 +79,7 @@ type_spec   : INT { $$ = newExpNode(IdK);
             | VOID { $$ = newExpNode(IdK);
                      $$->type = Void; }
             ;
-fn_decl     : type_spec ID { savedName = copyString(tokenString);
+fn_decl     : type_spec ID { savedName = copyString(tokenString[current]);
                              savedLineNo = lineno; }
               LPAREN params RPAREN comp_stmt
                 { $$ = newDeclNode(FnK);
@@ -111,12 +114,12 @@ param_list  : param_list COMMA param
             ;
 param       : type_spec ID
                 { $$ = newDeclNode(VarK);
-                  $$->attr.name = copyString(tokenString);
+                  $$->attr.name = copyString(tokenString[current]);
                   $$->lineno = lineno;
                   $$->type = $1->type;
                   free($1);
                 }
-            | type_spec ID { savedName = copyString(tokenString);
+            | type_spec ID { savedName = copyString(tokenString[current]);
                              savedLineNo = lineno; }
               LBRACE RBRACE
                 { $$ = newDeclNode(VarK);
@@ -212,12 +215,12 @@ expr        : var ASSIGN expr
             ;
 var         : ID 
                 { $$ = newExpNode(IdK);
-                  $$->attr.name = copyString(tokenString);
+                  $$->attr.name = copyString(tokenString[current]);
                 }
-            | ID { savedName = copyString(tokenString); } 
+            | ID { savedName = copyString(tokenString[current]); } 
               LBRACE expr RBRACE
                 { $$ = newExpNode(IdK);
-                  $$->attr.name = copyString(tokenString);
+                  $$->attr.name = copyString(tokenString[current]);
                   $$->child[0] = $4;
                 }
             ;
@@ -266,10 +269,10 @@ factor      : LPAREN expr RPAREN { $$ = $2; }
             | call { $$ = $1; }
             | NUM
                 { $$ = newExpNode(ConstK);
-                  $$->attr.val = atoi(tokenString);
+                  $$->attr.val = atoi(tokenString[current]);
                 }
             ;
-call        : ID { savedName = copyString(tokenString); }
+call        : ID { savedName = copyString(tokenString[current]); }
               LPAREN args RPAREN
                 { $$ = newExpNode(CallK);
                   $$->attr.name = savedName;
@@ -293,7 +296,7 @@ arg_list    : arg_list COMMA expr
 int yyerror(char * message)
 { fprintf(listing,"Syntax error at line %d: %s\n",lineno,message);
   fprintf(listing,"Current token: ");
-  printToken(yychar,tokenString);
+  printToken(yychar,tokenString[current]);
   Error = TRUE;
   return 0;
 }
@@ -301,7 +304,7 @@ int yyerror(char * message)
 /* yylex calls getToken to make Yacc/Bison output
  * compatible with ealier versions of the TINY scanner
  */
-static int yylex(void)
+int yylex(void)
 { return getToken(); }
 
 TreeNode * parse(void)
