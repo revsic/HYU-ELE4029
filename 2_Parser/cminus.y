@@ -6,10 +6,6 @@
 /****************************************************/
 %{
 #define YYPARSER /* distinguishes Yacc output from other code files */
-
-#include <stdio.h>
-#define DBG printf("%d\n", __LINE__);
-
 #include "globals.h"
 #include "util.h"
 #include "scan.h"
@@ -93,7 +89,7 @@ fn_decl     : type_spec ID { savedName = copyString(tokenString[1 - current]);
                   free($1);
                 }
             ;
-params      : param_list { $$ = $1; DBG }
+params      : param_list { $$ = $1; }
             | VOID
                 { $$ = newDeclNode(ParamK);
                   $$->attr.name = "(null)";
