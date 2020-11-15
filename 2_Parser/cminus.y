@@ -224,7 +224,8 @@ var         : ID
               LBRACE expr RBRACE
                 { $$ = newExpNode(IdK);
                   $$->attr.name = savedName[--nameidx];
-                  $$->child[0] = $4;
+                  $$->child[0] = newExpNode(IdxK);
+                  $$->child[0]->child[0] = $4;
                 }
             ;
 simple_expr : add_expr relop add_expr
