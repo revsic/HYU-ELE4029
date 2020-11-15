@@ -62,7 +62,7 @@ var_decl    : type_spec
                   free($1);
                 }
             | type_spec
-              ID { savedName = copyString(tokenString[current]);
+              ID { savedName = copyString(tokenString[1 - current]);
                    savedLineNo = lineno; }
               LBRACE
               NUM { savedNum = atoi(tokenString[current]); }
