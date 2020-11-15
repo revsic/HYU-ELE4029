@@ -52,7 +52,7 @@ decl        : var_decl { $$ = $1; }
             | fn_decl  { $$ = $1; }
             ;
 var_decl    : type_spec
-              ID { savedName = copyString(tokenString[current]);
+              ID { savedName = copyString(tokenString[1 - current]);
                    savedLineNo = lineno; }
               SEMI
                 { $$ = newDeclNode(VarK);
@@ -68,9 +68,11 @@ var_decl    : type_spec
               NUM { savedNum = atoi(tokenString[current]); }
               RBRACE SEMI
                 { $$ = newDeclNode(VarK);
-                  $$->attr.array = arrayAttr(savedName, savedNum);
+                  $$->attr.name = savedName;
                   $$->lineno = savedLineNo;
                   $$->type = $1->type;
+                  $$->child[0] = newExpNode(ConstK);
+                  $$->child[0]->attr.val = savedNum;
                   free($1);
                 }
             ;
@@ -123,9 +125,11 @@ param       : type_spec ID
                              savedLineNo = lineno; }
               LBRACE RBRACE
                 { $$ = newDeclNode(VarK);
-                  $$->attr.array = arrayAttr(savedName, -1);
+                  $$->attr.name = savedName;
                   $$->lineno = savedLineNo;
                   $$->type = $1->type;
+                  $$->child[0] = newExpNode(ConstK);
+                  $$->child[0]->attr.val = -1;
                   free($1);
                 }
             ;
