@@ -1,31 +1,32 @@
 CC = gcc
 CFLAGS = 
 
-OBJS = main.o util.o scan.o
-OBJS_FLEX = main.o util.o lex.yy.o
+OBJS = main.o util.o lex.yy.o y.tab.o
 
-.PHONY: all scanner_cimpl scanner_flex $(OBJS) $(OBJS_FLEX) lex.yy.c
+all: cminus
 
-all: scanner_cimpl scanner_flex
+cminus: $(OBJS)
+	$(CC) $(CFLAGS) $(OBJS) -o $@ -lfl
 
-scanner_cimpl: $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) -o $@
-
-scanner_flex: $(OBJS_FLEX)
-	$(CC) $(CFLAGS) $(OBJS_FLEX) -o $@ -lfl
-
-lex.yy.o: ./lex/cminus.l
-	flex $^
-	$(CC) $(CFLAGS) -c lex.yy.c
-
-main.o: main.c globals.h util.h scan.h
+main.o: main.c globals.h y.tab.h util.h scan.h parse.h
 	$(CC) $(CFLAGS) -c main.c
 
 util.o: util.c util.h globals.h
 	$(CC) $(CFLAGS) -c util.c
 
-scan.o: scan.c scan.h util.h globals.h
-	$(CC) $(CFLAGS) -c scan.c
+lex.yy.c: cminus.l
+	flex cminus.l
+
+lex.yy.o: lex.yy.c globals.h util.h scan.h
+	$(CC) $(CFLAGS) -c lex.yy.c
+
+y.tab.c: cminus.y
+	yacc -d -v cminus.y
+
+y.tab.h: y.tab.c
+
+y.tab.o: y.tab.c y.tab.h globals.h util.h scan.h parse.h
+	$(CC) $(CFLAGS) -c y.tab.c
 
 clean:
-	rm -vf scanner_cimpl scanner_flex *.o lex.yy.c
+	rm -vf cminus *.o lex.yy.c y.tab.c y.tab.h
