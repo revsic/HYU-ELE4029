@@ -15,7 +15,7 @@
 /* set NO_CODE to TRUE to get a compiler that does not
  * generate code
  */
-#define NO_CODE FALSE
+#define NO_CODE TRUE
 
 #include "util.h"
 #if NO_PARSE
@@ -38,7 +38,7 @@ FILE * code;
 
 /* allocate and set tracing flags */
 int EchoSource = FALSE;
-int TraceScan = FALSE;
+int TraceScan = TRUE;
 int TraceParse = TRUE;
 int TraceAnalyze = FALSE;
 int TraceCode = FALSE;
