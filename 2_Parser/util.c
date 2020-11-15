@@ -262,6 +262,9 @@ void printTree( TreeNode * tree )
           case CallK:
             fprintf(listing,"Call, name : %s, with arguments below\n",tree->attr.name);
             break;
+          case IdxK:
+            fprintf(listing,"Indexing : (expression)\n");
+            break;
           default:
             fprintf(listing,"Unknown ExpNode kind\n");
             break;
