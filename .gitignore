@@ -4,6 +4,10 @@
 # lexer
 lex.yy.c
 
+# parser
+y.tab.*
+y.output
+
 # executable
 scanner_cimpl
 scanner_flex
