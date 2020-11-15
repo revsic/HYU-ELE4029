@@ -11,7 +11,7 @@ cminus: $(OBJS)
 main.o: main.c globals.h y.tab.h util.h scan.h parse.h
 	$(CC) $(CFLAGS) -c main.c
 
-util.o: util.c util.h globals.h
+util.o: util.c util.h globals.h y.tab.h
 	$(CC) $(CFLAGS) -c util.c
 
 lex.yy.c: cminus.l
@@ -29,4 +29,4 @@ y.tab.o: y.tab.c y.tab.h globals.h util.h scan.h parse.h
 	$(CC) $(CFLAGS) -c y.tab.c
 
 clean:
-	rm -vf cminus *.o lex.yy.c y.tab.c y.tab.h
+	rm -vf cminus *.o lex.yy.c y.tab.c y.tab.h y.output
