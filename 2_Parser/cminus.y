@@ -81,24 +81,24 @@ type_spec   : INT { $$ = newExpNode(IdK);
             | VOID { $$ = newExpNode(IdK);
                      $$->type = Void; }
             ;
-fn_decl     : type_spec ID { savedName = copyString(tokenString[current]);
+fn_decl     : type_spec ID { savedName = copyString(tokenString[1 - current]);
                              savedLineNo = lineno; }
               LPAREN params RPAREN comp_stmt
                 { $$ = newDeclNode(FnK);
-                  $$->child[0] = $4;
-                  $$->child[1] = $6;
+                  $$->child[0] = $5;
+                  $$->child[1] = $7;
                   $$->attr.name = savedName;
                   $$->lineno = savedLineNo;
                   $$->type = $1->type;
                   free($1);
                 }
             ;
-params      : param_list { $$ = $1; }
+params      : param_list { $$ = $1; DBG }
             | VOID
-                { $$ = newDeclNode(VarK);
-                  $$->attr.name = "void";
+                { $$ = newDeclNode(ParamK);
+                  $$->attr.name = "(null)";
                   $$->lineno = lineno;
-                  $$->type = Boolean;
+                  $$->type = Void;
                 }
             ;
 param_list  : param_list COMMA param
@@ -115,16 +115,16 @@ param_list  : param_list COMMA param
             | param { $$ = $1; }
             ;
 param       : type_spec ID
-                { $$ = newDeclNode(VarK);
-                  $$->attr.name = copyString(tokenString[current]);
+                { $$ = newDeclNode(ParamK);
+                  $$->attr.name = copyString(tokenString[1 - current]);
                   $$->lineno = lineno;
                   $$->type = $1->type;
                   free($1);
                 }
-            | type_spec ID { savedName = copyString(tokenString[current]);
+            | type_spec ID { savedName = copyString(tokenString[1 - current]);
                              savedLineNo = lineno; }
               LBRACE RBRACE
-                { $$ = newDeclNode(VarK);
+                { $$ = newDeclNode(ParamK);
                   $$->attr.name = savedName;
                   $$->lineno = savedLineNo;
                   $$->type = $1->type;
@@ -134,16 +134,17 @@ param       : type_spec ID
                 }
             ;
 comp_stmt   : LCURLY local_decl stmt_list RCURLY
-                { if ($2 == NULL)
-                    $$ = $3;
+                { $$ = newStmtNode(CompK);
+                  if ($2 == NULL)
+                    $$->child[0] = $3;
                   else if ($3 == NULL)
-                    $$ = $2;
+                   $$->child[0] = $2;
                   else {
                     YYSTYPE t = $1;
                     while (t->sibling != NULL)
                       t = t->sibling;
                     t->sibling = $2;
-                    $$ = $1;
+                    $$->child[0] = $1;
                   }
                 }
             ;
@@ -219,12 +220,12 @@ expr        : var ASSIGN expr
             ;
 var         : ID 
                 { $$ = newExpNode(IdK);
-                  $$->attr.name = copyString(tokenString[current]);
+                  $$->attr.name = copyString(tokenString[1 - current]);
                 }
-            | ID { savedName = copyString(tokenString[current]); } 
+            | ID { savedName = copyString(tokenString[1 - current]); } 
               LBRACE expr RBRACE
                 { $$ = newExpNode(IdK);
-                  $$->attr.name = copyString(tokenString[current]);
+                  $$->attr.name = savedName;
                   $$->child[0] = $4;
                 }
             ;
@@ -276,7 +277,7 @@ factor      : LPAREN expr RPAREN { $$ = $2; }
                   $$->attr.val = atoi(tokenString[current]);
                 }
             ;
-call        : ID { savedName = copyString(tokenString[current]); }
+call        : ID { savedName = copyString(tokenString[1 - current]); }
               LPAREN args RPAREN
                 { $$ = newExpNode(CallK);
                   $$->attr.name = savedName;
