@@ -72,8 +72,6 @@ typedef enum {Void,Integer,Boolean} ExpType;
 
 #define MAXCHILDREN 3
 
-typedef struct { char * name; int size; } ArrayAttr;
-
 typedef struct treeNode
    { struct treeNode * child[MAXCHILDREN];
      struct treeNode * sibling;
@@ -84,8 +82,7 @@ typedef struct treeNode
              ExpKind exp; } kind;
      union { TokenType op;
              int val;
-             char * name;
-             ArrayAttr * array; } attr;
+             char * name; } attr;
      ExpType type; /* for type checking of exps */
    } TreeNode;
 
