@@ -142,20 +142,6 @@ char * copyString(char * s)
   return t;
 }
 
-/* Function newArrayAttr allocates and makes a new
- * array attributes.
- */
-ArrayAttr * arrayAttr(char * name, int size)
-{ ArrayAttr * t = malloc(sizeof(ArrayAttr));
-  if (t == NULL)
-    fprintf(listing, "Out of memory error at line %d\n", lineno);
-  else {
-    t->name = name;
-    t->size = size;
-  }
-  return t;
-}
-
 /* Variable indentno is used by printTree to
  * store current number of spaces to indent
  */
@@ -180,45 +166,65 @@ void printTree( TreeNode * tree )
   INDENT;
   while (tree != NULL) {
     printSpaces();
-    if (tree->nodekind==StmtK)
-    { switch (tree->kind.stmt) {
-        case IfK:
-          fprintf(listing,"If\n");
-          break;
-        case WhileK:
-          fprintf(listing,"While\n");
-          break;
-        case ReturnK:
-          fprintf(listing,"Write\n");
-          break;
-        default:
-          fprintf(listing,"Unknown ExpNode kind\n");
-          break;
-      }
+    switch (tree->nodekind)
+    { case DeclK:
+        switch (tree->kind.decl) {
+          case VarK:
+            fprintf(listing,"Var: %s",tree->attr.name);
+            if (tree->child[0] != NULL) {
+              fprintf(listing,"[%d]",tree->child[0]->attr.val);
+            }
+            fprintf(listing,"\n");
+            break;
+          case FnK:
+            fprintf(listing,"Fn: %s\n",tree->attr.name);
+            break;
+          default:
+            fprintf(listing,"Unknown DeclNode kind\n");
+            break;
+        }
+        break;
+      case StmtK:
+        switch (tree->kind.stmt) {
+          case IfK:
+            fprintf(listing,"If\n");
+            break;
+          case WhileK:
+            fprintf(listing,"While\n");
+            break;
+          case ReturnK:
+            fprintf(listing,"Return\n");
+            break;
+          default:
+            fprintf(listing,"Unknown ExpNode kind\n");
+            break;
+        }
+        break;
+      case ExpK:
+        switch (tree->kind.exp) {
+          case AssignK:
+            fprintf(listing,"Assign to: %s\n",tree->attr.name);
+            break;
+          case OpK:
+            fprintf(listing,"Op: ");
+            printToken(tree->attr.op,"\0");
+            break;
+          case ConstK:
+            fprintf(listing,"Const: %d\n",tree->attr.val);
+            break;
+          case IdK:
+            fprintf(listing,"Id: %s\n",tree->attr.name);
+            break;
+          case CallK:
+            fprintf(listing,"Call: %s\n",tree->attr.name);
+          default:
+            fprintf(listing,"Unknown ExpNode kind\n");
+            break;
+        }
+        break;
+      default:
+        fprintf(listing,"Unknown node kind\n");
     }
-    else if (tree->nodekind==ExpK)
-    { switch (tree->kind.exp) {
-        case AssignK:
-          fprintf(listing,"Assign to: %s\n",tree->attr.name);
-          break;
-        case OpK:
-          fprintf(listing,"Op: ");
-          printToken(tree->attr.op,"\0");
-          break;
-        case ConstK:
-          fprintf(listing,"Const: %d\n",tree->attr.val);
-          break;
-        case IdK:
-          fprintf(listing,"Id: %s\n",tree->attr.name);
-          break;
-        case CallK:
-          fprintf(listing,"Call: %s\n",tree->attr.name);
-        default:
-          fprintf(listing,"Unknown ExpNode kind\n");
-          break;
-      }
-    }
-    else fprintf(listing,"Unknown node kind\n");
     for (i=0;i<MAXCHILDREN;i++)
          printTree(tree->child[i]);
     tree = tree->sibling;

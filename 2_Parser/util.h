@@ -38,11 +38,6 @@ TreeNode * newOpNode(TokenType);
  */
 char * copyString( char * );
 
-/* Function newArrayAttr allocates and makes a new
- * array attributes.
- */
-ArrayAttr * arrayAttr( char *, int );
-
 /* procedure printTree prints a syntax tree to the 
  * listing file using indentation to indicate subtrees
  */
