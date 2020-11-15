@@ -12,7 +12,9 @@
 #include "parse.h"
 
 #define YYSTYPE TreeNode *
-static char * savedName; /* for use in assignments */
+#define MAXNAMESAVING 30
+static char * savedName[MAXNAMESAVING]; /* for use in assignments */
+static int nameidx;
 static int savedNum;     /* for use in array assignments */
 static int savedLineNo;  /* ditto */
 static TreeNode * savedTree; /* stores syntax tree for later return */
@@ -48,23 +50,23 @@ decl        : var_decl { $$ = $1; }
             | fn_decl  { $$ = $1; }
             ;
 var_decl    : type_spec
-              ID { savedName = copyString(tokenString[1 - current]);
+              ID { savedName[nameidx++] = copyString(tokenString[1 - current]);
                    savedLineNo = lineno; }
               SEMI
                 { $$ = newDeclNode(VarK);
-                  $$->attr.name = savedName;
+                  $$->attr.name = savedName[--nameidx];
                   $$->lineno = savedLineNo;
                   $$->type = $1->type;
                   free($1);
                 }
             | type_spec
-              ID { savedName = copyString(tokenString[1 - current]);
+              ID { savedName[nameidx++] = copyString(tokenString[1 - current]);
                    savedLineNo = lineno; }
               LBRACE
               NUM { savedNum = atoi(tokenString[current]); }
               RBRACE SEMI
                 { $$ = newDeclNode(VarK);
-                  $$->attr.name = savedName;
+                  $$->attr.name = savedName[--nameidx];
                   $$->lineno = savedLineNo;
                   $$->type = $1->type;
                   $$->child[0] = newExpNode(ConstK);
@@ -77,13 +79,13 @@ type_spec   : INT { $$ = newExpNode(IdK);
             | VOID { $$ = newExpNode(IdK);
                      $$->type = Void; }
             ;
-fn_decl     : type_spec ID { savedName = copyString(tokenString[1 - current]);
+fn_decl     : type_spec ID { savedName[nameidx++] = copyString(tokenString[1 - current]);
                              savedLineNo = lineno; }
               LPAREN params RPAREN comp_stmt
                 { $$ = newDeclNode(FnK);
                   $$->child[0] = $5;
                   $$->child[1] = $7;
-                  $$->attr.name = savedName;
+                  $$->attr.name = savedName[--nameidx];
                   $$->lineno = savedLineNo;
                   $$->type = $1->type;
                   free($1);
@@ -117,11 +119,11 @@ param       : type_spec ID
                   $$->type = $1->type;
                   free($1);
                 }
-            | type_spec ID { savedName = copyString(tokenString[1 - current]);
+            | type_spec ID { savedName[nameidx++] = copyString(tokenString[1 - current]);
                              savedLineNo = lineno; }
               LBRACE RBRACE
                 { $$ = newDeclNode(ParamK);
-                  $$->attr.name = savedName;
+                  $$->attr.name = savedName[--nameidx];
                   $$->lineno = savedLineNo;
                   $$->type = $1->type;
                   $$->child[0] = newExpNode(ConstK);
@@ -218,10 +220,10 @@ var         : ID
                 { $$ = newExpNode(IdK);
                   $$->attr.name = copyString(tokenString[1 - current]);
                 }
-            | ID { savedName = copyString(tokenString[1 - current]); } 
+            | ID { savedName[nameidx++] = copyString(tokenString[1 - current]); } 
               LBRACE expr RBRACE
                 { $$ = newExpNode(IdK);
-                  $$->attr.name = savedName;
+                  $$->attr.name = savedName[--nameidx];
                   $$->child[0] = $4;
                 }
             ;
@@ -273,10 +275,10 @@ factor      : LPAREN expr RPAREN { $$ = $2; }
                   $$->attr.val = atoi(tokenString[current]);
                 }
             ;
-call        : ID { savedName = copyString(tokenString[1 - current]); }
+call        : ID { savedName[nameidx++] = copyString(tokenString[1 - current]); }
               LPAREN args RPAREN
                 { $$ = newExpNode(CallK);
-                  $$->attr.name = savedName;
+                  $$->attr.name = savedName[--nameidx];
                   $$->child[0] = $4;
                 }
             ;
@@ -309,7 +311,8 @@ int yylex(void)
 { return getToken(); }
 
 TreeNode * parse(void)
-{ yyparse();
+{ nameidx = 0;
+  yyparse();
   return savedTree;
 }
 
