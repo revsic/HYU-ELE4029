@@ -8,6 +8,7 @@
 
 #include "globals.h"
 #include "util.h"
+#include "y.tab.h"
 
 /* Procedure printToken prints a token 
  * and its lexeme to the listing file
@@ -60,6 +61,24 @@ void printToken( TokenType token, const char* tokenString )
   }
 }
 
+/* Function newDeclNode creates a new declaration
+ * node for syntax tree construction
+ */
+TreeNode * newDeclNode(DeclKind kind)
+{ TreeNode * t = (TreeNode *) malloc(sizeof(TreeNode));
+  int i;
+  if (t==NULL)
+    fprintf(listing,"Out of memory error at line %d\n",lineno);
+  else {
+    for (i=0;i<MAXCHILDREN;i++) t->child[i] = NULL;
+    t->sibling = NULL;
+    t->nodekind = DeclK;
+    t->kind.decl = kind;
+    t->lineno = lineno;
+  }
+  return t;
+}
+
 /* Function newStmtNode creates a new statement
  * node for syntax tree construction
  */
@@ -97,6 +116,17 @@ TreeNode * newExpNode(ExpKind kind)
   return t;
 }
 
+
+/* Function newOpNode creates a new operation
+ * node for syntax tree construction
+ */
+TreeNode * newOpNode(TokenType optype)
+{ TreeNode * t = newExpNode(OpK);
+  if (t != NULL)
+    t->attr.op = optype;
+  return t;
+}
+
 /* Function copyString allocates and makes a new
  * copy of an existing string
  */
@@ -112,10 +142,24 @@ char * copyString(char * s)
   return t;
 }
 
+/* Function newArrayAttr allocates and makes a new
+ * array attributes.
+ */
+ArrayAttr * arrayAttr(char * name, int size)
+{ ArrayAttr * t = malloc(sizeof(ArrayAttr));
+  if (t == NULL)
+    fprintf(listing, "Out of memory error at line %d\n", lineno);
+  else {
+    t->name = name;
+    t->size = size;
+  }
+  return t;
+}
+
 /* Variable indentno is used by printTree to
  * store current number of spaces to indent
  */
-static indentno = 0;
+static int indentno = 0;
 
 /* macros to increase/decrease indentation */
 #define INDENT indentno+=2
@@ -141,16 +185,10 @@ void printTree( TreeNode * tree )
         case IfK:
           fprintf(listing,"If\n");
           break;
-        case RepeatK:
-          fprintf(listing,"Repeat\n");
+        case WhileK:
+          fprintf(listing,"While\n");
           break;
-        case AssignK:
-          fprintf(listing,"Assign to: %s\n",tree->attr.name);
-          break;
-        case ReadK:
-          fprintf(listing,"Read: %s\n",tree->attr.name);
-          break;
-        case WriteK:
+        case ReturnK:
           fprintf(listing,"Write\n");
           break;
         default:
@@ -160,6 +198,9 @@ void printTree( TreeNode * tree )
     }
     else if (tree->nodekind==ExpK)
     { switch (tree->kind.exp) {
+        case AssignK:
+          fprintf(listing,"Assign to: %s\n",tree->attr.name);
+          break;
         case OpK:
           fprintf(listing,"Op: ");
           printToken(tree->attr.op,"\0");
@@ -170,6 +211,8 @@ void printTree( TreeNode * tree )
         case IdK:
           fprintf(listing,"Id: %s\n",tree->attr.name);
           break;
+        case CallK:
+          fprintf(listing,"Call: %s\n",tree->attr.name);
         default:
           fprintf(listing,"Unknown ExpNode kind\n");
           break;
