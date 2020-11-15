@@ -140,11 +140,11 @@ comp_stmt   : LCURLY local_decl stmt_list RCURLY
                   else if ($3 == NULL)
                    $$->child[0] = $2;
                   else {
-                    YYSTYPE t = $1;
+                    YYSTYPE t = $2;
                     while (t->sibling != NULL)
                       t = t->sibling;
-                    t->sibling = $2;
-                    $$->child[0] = $1;
+                    t->sibling = $3;
+                    $$->child[0] = $2;
                   }
                 }
             ;
