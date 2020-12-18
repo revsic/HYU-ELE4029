@@ -14,9 +14,6 @@
 #include "symtab.h"
 #include "util.h"
 
-/* SIZE is the size of the hash table */
-#define SIZE 211
-
 /* SHIFT is the power of two used as multiplier
    in hash function  */
 #define SHIFT 4
@@ -26,43 +23,11 @@ static int hash ( char * key )
 { int temp = 0;
   int i = 0;
   while (key[i] != '\0')
-  { temp = ((temp << SHIFT) + key[i]) % SIZE;
+  { temp = ((temp << SHIFT) + key[i]) % HASHSIZE;
     ++i;
   }
   return temp;
 }
-
-/* the list of line numbers of the source 
- * code in which a variable is referenced
- */
-typedef struct LineListRec
-   { int lineno;
-     struct LineListRec * next;
-   } * LineList;
-
-/* The record in the bucket lists for
- * each variable, including name, 
- * assigned memory location, and
- * the list of line numbers in which
- * it appears in the source code
- */
-typedef struct BucketListRec
-   { char * name;
-     ExpType type;
-     LineList lines;
-     int memloc ; /* memory location for variable */
-     struct BucketListRec * next;
-   } * BucketList;
-
-/* The list of ID scopes.
- */
-typedef struct ScopeListRec
-   { char * name;
-     BucketList bucket[SIZE];
-     struct ScopeListRec * parent;  // parent node
-     struct ScopeListRec * child;   // first child
-     struct ScopeListRec * next;    // linked list, siblings.
-   } * ScopeList;
 
 /* global scope */
 static ScopeList globalScope = NULL;
@@ -71,7 +36,7 @@ ScopeList scope_init ( char * name )
 { int i;
   ScopeList scope = (ScopeList)malloc(sizeof(struct ScopeListRec));
   scope->name = copyString(name);
-  for (i = 0; i < SIZE; ++i)
+  for (i = 0; i < HASHSIZE; ++i)
     scope->bucket[i] = NULL;
   scope->parent = NULL;
   scope->child = NULL;
@@ -82,6 +47,11 @@ ScopeList scope_init ( char * name )
 /* Initialize global scope. */
 void global_init ( void )
 { globalScope = scope_init("global");
+}
+
+/* Get global scope. */
+ScopeList global_scope( void )
+{ return globalScope;
 }
 
 /* Traverse scope to find the given scope name, BFS. */
@@ -104,6 +74,15 @@ ScopeList scope_find_recur ( ScopeList scope, char * name )
 /* Find scope, return proper pointer if found or NULL. */
 ScopeList scope_find ( char * scope )
 { return scope_find_recur(globalScope, scope);
+}
+
+/* Find variable bucket from specified scope. */
+BucketList scope_search ( ScopeList record, char * name )
+{ int h = hash(name);
+  BucketList l =  record->bucket[h];
+  while ((l != NULL) && (strcmp(name,l->name) != 0))
+    l = l->next;
+  return l;
 }
 
 /* Insert new scope to specified parent. */
@@ -129,91 +108,72 @@ int scope_insert ( char * parent, char * name )
   return 1;
 }
 
-/* Find variable bucket from specified scope. */
-BucketList scope_search ( ScopeList record, char * name )
-{ int h = hash(name);
-  BucketList l =  record->bucket[h];
-  while ((l != NULL) && (strcmp(name,l->name) != 0))
-    l = l->next;
-  return l;
+static SymAddr symaddr(ScopeList scope, BucketList bucket)
+{ SymAddr addr;
+  addr.scope = scope;
+  addr.bucket = bucket;
+  return addr;
 }
-
-/* Procedure st_insert inserts line numbers and
- * memory locations into the symbol table
- * loc = memory location is inserted only the
- * first time, otherwise ignored
- */
-int st_insert ( char * scope, char * name, ExpType type, int lineno, int loc )
-{ int h;
-  BucketList l;
-  // find scope
-  ScopeList scopeRec = scope_find(scope);
-  if (scopeRec == NULL)
-    return 0;
-  // addition purpose
-  if (loc == -1)
-  { while ((l = scope_search(scopeRec, name)) == NULL && scopeRec->parent != NULL)
-      scopeRec = scopeRec->parent;
-    // if node not found
-    if (l == NULL)
-      return 0;
-  }
-  // find hashtable bucket
-  h = hash(name);
-  l = scopeRec->bucket[h];
-  while ((l != NULL) && (strcmp(name,l->name) != 0))
-    l = l->next;
-  if (l == NULL) /* variable not yet in table */
-  { l = (BucketList) malloc(sizeof(struct BucketListRec));
-    l->name = copyString(name);
-    l->type = type;
-    l->lines = (LineList) malloc(sizeof(struct LineListRec));
-    l->lines->lineno = lineno;
-    l->memloc = loc;
-    l->lines->next = NULL;
-    l->next = scopeRec->bucket[h];
-    scopeRec->bucket[h] = l; }
-  else /* found in table, so just add line number */
-  { LineList t = l->lines;
-    while (t->next != NULL) t = t->next;
-    t->next = (LineList) malloc(sizeof(struct LineListRec));
-    t->next->lineno = lineno;
-    t->next->next = NULL;
-  }
-  return 1;
-} /* st_insert */
 
 /* Function st_lookup returns the memory 
  * location of a variable or -1 if not found
  */
-int st_lookup ( char * scope, char * name )
+SymAddr st_lookup ( char * scope, char * name )
 { // find scope
   ScopeList scopeRec = scope_find(scope);
   if (scopeRec == NULL)
-    return 0;
+    return symaddr(scopeRec, NULL);
   // find variable
   BucketList l;
   while ((l = scope_search(scopeRec, name)) == NULL && scopeRec->parent != NULL)
     scopeRec = scopeRec->parent;
-  if (l == NULL)
-    return 0;
-  return 1;
+  return symaddr(scopeRec, l);
 }
 
 /* Find ID bucket from specified scope, excluding its parent. */
-int st_lookup_excluding_parent ( char * scope, char * name )
+SymAddr st_lookup_excluding_parent ( char * scope, char * name )
 { // find scope
   ScopeList scopeRec = scope_find(scope);
   if (scopeRec == NULL)
-    return 0;
+    return symaddr(NULL, NULL);
   // find variable
-  if (scope_search(scopeRec, name) == NULL)
+  return symaddr(scopeRec, scope_search(scopeRec, name));
+}
+
+/* Procedure st_insert inserts line numbers and
+ * memory locations into the symbol table.
+ */
+int st_insert ( ScopeList scope, char * name, ExpType type, int lineno, int loc )
+{ // find hashtable bucket
+  int h = hash(name);
+  BucketList l = scope->bucket[h];
+  while ((l != NULL) && (strcmp(name,l->name) != 0))
+    l = l->next;
+  if (l != NULL)
     return 0;
+  l = (BucketList) malloc(sizeof(struct BucketListRec));
+  l->name = copyString(name);
+  l->type = type;
+  l->lines = (LineList) malloc(sizeof(struct LineListRec));
+  l->lines->lineno = lineno;
+  l->memloc = loc;
+  l->fninfo = NULL;
+  l->lines->next = NULL;
+  l->next = scope->bucket[h];
+  scope->bucket[h] = l;
   return 1;
+} /* st_insert */
+
+void st_appendline ( BucketList bucket, int lineno )
+{ LineList t = bucket->lines;
+  while (t->next != NULL) t = t->next;
+  t->next = (LineList) malloc(sizeof(struct LineListRec));
+  t->next->lineno = lineno;
+  t->next->next = NULL;
 }
 
 /* Traverse scope with given callback. */ 
-void scope_traverse ( ScopeList scope, void (* callback) (ScopeList) )
+static void scope_traverse ( ScopeList scope, void (* callback) (ScopeList) )
 { callback(scope);
   // if in siblings, breadth-first
   if (scope->next != NULL)
@@ -224,11 +184,11 @@ void scope_traverse ( ScopeList scope, void (* callback) (ScopeList) )
 }
 
 /* Print symbol table of given scope. */
-void scope_print ( ScopeList list, FILE * listing )
+static void scope_print ( ScopeList list, FILE * listing )
 { int i;
   if (list == NULL)
     return;
-  for (i = 0; i < SIZE; ++i)
+  for (i = 0; i < HASHSIZE; ++i)
   { if (list->bucket[i] != NULL)
     { BucketList l = list->bucket[i];
       while (l != NULL)
@@ -253,7 +213,7 @@ static FILE * stream;
 /* Print symbol table of given scope,
  * assume `stream` as parameter implicitly.
  */
-void scope_print_stream(ScopeList list)
+static void scope_print_stream(ScopeList list)
 { scope_print(list, stream);
 }
 

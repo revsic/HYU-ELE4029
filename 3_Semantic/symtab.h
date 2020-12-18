@@ -11,12 +11,84 @@
 
 #include "globals.h"
 
+/* HASHSIZE is the size of the hash table */
+#define HASHSIZE 211
+
+/* the list of line numbers of the source 
+ * code in which a variable is referenced
+ */
+typedef struct LineListRec
+   { int lineno;
+     struct LineListRec * next;
+   } * LineList;
+
+typedef struct
+  { ExpType retn;
+    struct {
+      ExpType type;
+      char * name;
+    } params[10];
+  } FunctionInfo;
+
+/* The record in the bucket lists for
+ * each variable, including name, 
+ * assigned memory location, and
+ * the list of line numbers in which
+ * it appears in the source code
+ */
+typedef struct BucketListRec
+   { char * name;
+     ExpType type;
+     LineList lines;
+     int memloc ; /* memory location for variable */
+     FunctionInfo * fninfo;
+     struct BucketListRec * next;
+   } * BucketList;
+
+/* The list of ID scopes.
+ */
+typedef struct ScopeListRec
+   { char * name;
+     BucketList bucket[HASHSIZE];
+     struct ScopeListRec * parent;  // parent node
+     struct ScopeListRec * child;   // first child
+     struct ScopeListRec * next;    // linked list, siblings.
+   } * ScopeList;
+
+/* Address to symbol table.
+ */
+typedef struct
+   { ScopeList scope;
+     BucketList bucket;
+   } SymAddr;
+
 /* Procedure for initializing global scope.
  */
 void global_init ( void );
 
+/* Get global scope.
+ */
+ScopeList global_scope( void );
+
+/* Find scope. */
+ScopeList scope_find ( char * scope );
+
+/* Search identity from given record. */
+BucketList scope_search ( ScopeList record, char * name );
+
 /* Insert new scope to specified parent. */
 int scope_insert ( char * parent, char * name );
+
+/* Function st_lookup returns the bucket pointer
+ * of a variable or 0 if not found.
+ */
+SymAddr st_lookup ( char * scope, char * name );
+
+/* Function st_lookup_excluding_parent returns the bucket pointer
+ * of variable or 0 if not found,
+ * only in the specified scope (excluding parent).
+ */
+SymAddr st_lookup_excluding_parent ( char * scope, char * name );
 
 /* Procedure st_insert inserts line numbers and
  * memory locations into the symbol table
@@ -24,18 +96,10 @@ int scope_insert ( char * parent, char * name );
  * first time, otherwise ignored.
  * Return 1 for success, 0 for scope not found.
  */
-int st_insert( char * scope, char * name, ExpType type, int lineno, int loc );
+int st_insert( ScopeList scope, char * name, ExpType type, int lineno, int loc );
 
-/* Function st_lookup returns the bucket pointer
- * of a variable or 0 if not found.
- */
-int st_lookup ( char * scope, char * name );
-
-/* Function st_lookup_excluding_parent returns the bucket pointer
- * of variable or 0 if not found,
- * only in the specified scope (excluding parent).
- */
-int st_lookup_excluding_parent ( char * scope, char * name );
+/* Append new line list to the given bucket. */
+void st_appendline ( BucketList bucket, int lineno );
 
 /* Procedure printSymTab prints a formatted 
  * listing of the symbol table contents 
