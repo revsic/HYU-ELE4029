@@ -194,7 +194,7 @@ int st_lookup_excluding_parent ( char * scope, char * name )
 { // find scope
   ScopeList scopeRec = scope_find(scope);
   if (scopeRec == NULL)
-    return NULL;
+    return 0;
   // find variable
   if (scope_search(scopeRec, name) == NULL)
     return 0;
