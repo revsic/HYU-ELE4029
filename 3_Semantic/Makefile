@@ -28,7 +28,7 @@ y.tab.h: y.tab.c
 y.tab.o: y.tab.c y.tab.h globals.h util.h scan.h parse.h
 	$(CC) $(CFLAGS) -c y.tab.c
 
-symtab.o: symtab.c symtab.h
+symtab.o: symtab.c symtab.h globals.h
 	$(CC) $(CFLAGS) -c symtab.c
 
 analyze.o: analyze.c analyze.h
