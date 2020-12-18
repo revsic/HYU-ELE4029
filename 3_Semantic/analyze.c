@@ -100,32 +100,38 @@ static void postInsert( TreeNode * t )
  */
 static void insertNode( TreeNode * t)
 { char * name;
+  SymAddr addr;
   switch (t->nodekind)
   { case DeclK:
+      addr = st_lookup(scope[scopeidx].name, t->attr.name);
       switch (t->kind.decl)
       { case ParamK:
           if (t->type == Void)
             break;
           // fall through
         case VarK:
-          if (st_lookup(scope[scopeidx].name, t->attr.name) != 0)
+          if (addr.bucket != 0)
           { Error = TRUE;
             fprintf(listing, "Error: Redeclared Variable \"%s\" at line %d\n",
               t->attr.name, t->lineno);
           }
           else
-            st_insert(scope[scopeidx].name, t->attr.name, t->type,
+            st_insert(
+              scope_find(scope[scopeidx].name),
+              t->attr.name, t->type,
               t->lineno, scope[scopeidx].location++);
           break;
         case FnK:
-          if (st_lookup(scope[scopeidx].name, t->attr.name) != 0)
+          if (addr.bucket != 0)
           { Error = TRUE;
             fprintf(listing, "Error: Redeclared function \"%s\" at line %d\n",
               t->attr.name, t->lineno);
           }
           else
           { // insert function
-            st_insert(scope[scopeidx].name, t->attr.name, Function,
+            st_insert(
+              scope_find(scope[scopeidx].name),
+              t->attr.name, Function,
               t->lineno, scope[scopeidx].location++);
             scope_insert(scope[scopeidx].name, t->attr.name);
             // update current scope info
@@ -178,7 +184,8 @@ static void insertNode( TreeNode * t)
         case IdK:
           // fall through
         case CallK:
-          if (st_lookup(scope[scopeidx].name, t->attr.name) == 0)
+          addr = st_lookup(scope[scopeidx].name, t->attr.name);
+          if (addr.bucket == 0)
           { Error = TRUE;
             fprintf(listing, "Error: Undeclared ID \"%s\" at line %d\n",
               t->attr.name, t->lineno);
@@ -186,8 +193,7 @@ static void insertNode( TreeNode * t)
           else
           /* already in table, so ignore location, 
              add line number of use only */ 
-            st_insert(scope[scopeidx].name, t->attr.name, t->type,
-              t->lineno, -1);
+            st_appendline(addr.bucket, t->lineno);
           break;
         case IdxK:
         default:
@@ -204,8 +210,8 @@ static void init_state()
 { // initialize scope
   global_init();
   // predefined
-  st_insert("global", "input", Function, 0, 0);
-  st_insert("global", "output", Function, 0, 1);
+  st_insert(global_scope(), "input", Function, 0, 0);
+  st_insert(global_scope(), "output", Function, 0, 1);
   // initialize scope block
   scope[0].name = copyString("global");
   scope[0].location = 2;
@@ -220,7 +226,7 @@ void buildSymtab(TreeNode * syntaxTree)
 { init_state();
   traverse(syntaxTree,insertNode,postInsert);
   if (Error == 0 && TraceAnalyze)
-  { fprintf(listing,"\nSymbol table:\n\n");
+  { fprintf(listing,"\n< Symbol table >\n");
     printSymTab(listing);
   }
 }
