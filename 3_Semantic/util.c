@@ -82,7 +82,7 @@ const char * dbgExpType(ExpType token)
  */
 void printExpType(ExpType token)
 { 
-  fprintf(listing, dbgExpType(token));
+  fprintf(listing, "%s", dbgExpType(token));
 }
 
 /* Function newDeclNode creates a new declaration
