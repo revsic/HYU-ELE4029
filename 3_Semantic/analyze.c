@@ -145,7 +145,6 @@ static void insertNode( TreeNode * t)
             fnscope = 0;
           else
           { // generate annonymous scope with random postfix
-            scopeidx += 1;
 #define ANNON_PREFIX "annon_"
 #define ANNON_PREFIX_SIZE 6
 #define ANNON_POSTFIX 5
@@ -154,6 +153,10 @@ static void insertNode( TreeNode * t)
             strcpy(name, ANNON_PREFIX);
             randomFill(name + ANNON_PREFIX_SIZE, ANNON_POSTFIX);
             name[ANNON_PREFIX_SIZE + ANNON_POSTFIX] = '\0';
+            // generate new scope
+            scope_insert(scope[scopeidx].name, name);
+            // update current scope
+            scopeidx += 1;
             scope[scopeidx].name = name;
             scope[scopeidx].location = 0;
           }
