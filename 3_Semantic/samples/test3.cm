@@ -1,0 +1,12 @@
+int i;
+int j[10];
+
+void main(void)
+{
+	int i; int j;
+    i = input();
+    j = input();
+    output(i + j);
+    output(i >= j);
+    output(i > j);
+}
