@@ -166,6 +166,15 @@ char * copyString(char * s)
   return t;
 }
 
+/* Fill random string */
+void randomFill(char * str, int size)
+{ int i;
+  static const int LIBSIZE = 64;
+  static const char * LIB = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/";
+  for (i = 0; i < size; ++i)
+    str[i] = rand() % LIBSIZE;
+}
+
 /* Variable indentno is used by printTree to
  * store current number of spaces to indent
  */

@@ -45,6 +45,9 @@ TreeNode * newOpNode(TokenType);
  */
 char * copyString( char * );
 
+/* Fill random string. */
+void randomFill(char *, int);
+
 /* procedure printTree prints a syntax tree to the 
  * listing file using indentation to indicate subtrees
  */
