@@ -115,6 +115,7 @@ int scope_insert ( char * parent, char * name )
     return 0;
 
   newscope = scope_init(name);
+  newscope->parent = parentscope;
   // check child is null
   if (parentscope->child == NULL)
   { parentscope->child = newscope;
@@ -128,19 +129,38 @@ int scope_insert ( char * parent, char * name )
   return 1;
 }
 
+/* Find variable bucket from specified scope. */
+BucketList scope_search ( ScopeList record, char * name )
+{ int h = hash(name);
+  BucketList l =  record->bucket[h];
+  while ((l != NULL) && (strcmp(name,l->name) != 0))
+    l = l->next;
+  return l;
+}
+
 /* Procedure st_insert inserts line numbers and
  * memory locations into the symbol table
  * loc = memory location is inserted only the
  * first time, otherwise ignored
  */
 int st_insert ( char * scope, char * name, ExpType type, int lineno, int loc )
-{ // find scope
+{ int h;
+  BucketList l;
+  // find scope
   ScopeList scopeRec = scope_find(scope);
   if (scopeRec == NULL)
     return 0;
+  // addition purpose
+  if (loc == -1)
+  { while ((l = scope_search(scopeRec, name)) == NULL && scopeRec->parent != NULL)
+      scopeRec = scopeRec->parent;
+    // if node not found
+    if (l == NULL)
+      return 0;
+  }
   // find hashtable bucket
-  int h = hash(name);
-  BucketList l =  scopeRec->bucket[h];
+  h = hash(name);
+  l = scopeRec->bucket[h];
   while ((l != NULL) && (strcmp(name,l->name) != 0))
     l = l->next;
   if (l == NULL) /* variable not yet in table */
@@ -162,15 +182,6 @@ int st_insert ( char * scope, char * name, ExpType type, int lineno, int loc )
   }
   return 1;
 } /* st_insert */
-
-/* Find variable bucket from specified scope. */
-BucketList scope_search ( ScopeList record, char * name )
-{ int h = hash(name);
-  BucketList l =  record->bucket[h];
-  while ((l != NULL) && (strcmp(name,l->name) != 0))
-    l = l->next;
-  return l;
-}
 
 /* Function st_lookup returns the memory 
  * location of a variable or -1 if not found
