@@ -15,6 +15,9 @@
  */
 void global_init ( void );
 
+/* Insert new scope to specified parent. */
+int scope_insert ( char * parent, char * name );
+
 /* Procedure st_insert inserts line numbers and
  * memory locations into the symbol table
  * loc = memory location is inserted only the

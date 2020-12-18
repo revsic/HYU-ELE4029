@@ -106,6 +106,28 @@ ScopeList scope_find ( char * scope )
 { return scope_find_recur(globalScope, scope);
 }
 
+/* Insert new scope to specified parent. */
+int scope_insert ( char * parent, char * name )
+{ ScopeList newscope, siblings;
+  // find scope
+  ScopeList parentscope = scope_find(parent);
+  if (parentscope == NULL)
+    return 0;
+
+  newscope = scope_init(name);
+  // check child is null
+  if (parentscope->child == NULL)
+  { parentscope->child = newscope;
+    return 1;
+  }
+  // insert to last siblings of child
+  siblings = parentscope->child;
+  while (siblings->next != NULL)
+    siblings = siblings->next;
+  siblings->next = newscope;
+  return 1;
+}
+
 /* Procedure st_insert inserts line numbers and
  * memory locations into the symbol table
  * loc = memory location is inserted only the
