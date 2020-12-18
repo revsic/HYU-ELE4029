@@ -104,9 +104,7 @@ ScopeList scope_find_recur ( ScopeList scope, char * name )
 
 /* Find scope, return proper pointer if found or NULL. */
 ScopeList scope_find ( char * scope )
-{ if (globalScope == NULL)
-    global_init();
-  return scope_find_recur(globalScope, scope);
+{ return scope_find_recur(globalScope, scope);
 }
 
 /* Procedure st_insert inserts line numbers and
@@ -230,9 +228,6 @@ void scope_print_stream(ScopeList list)
 void printSymTab ( FILE * listing )
 { fprintf(listing,"Variable Name Variable Type  Scope Name  Location  Line Numbers\n");
   fprintf(listing,"------------- -------------  ----------  --------  ------------\n");
-  // init global
-  if (globalScope == NULL)
-    global_init();
   // implicit parameter setting
   stream = listing;
   scope_traverse(globalScope, scope_print_stream);

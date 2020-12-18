@@ -11,6 +11,10 @@
 
 #include "globals.h"
 
+/* Procedure for initializing global scope.
+ */
+void global_init ( void );
+
 /* Procedure st_insert inserts line numbers and
  * memory locations into the symbol table
  * loc = memory location is inserted only the
