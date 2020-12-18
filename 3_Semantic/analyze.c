@@ -228,6 +228,8 @@ void buildSymtab(TreeNode * syntaxTree)
     printSymTab(listing);
     fprintf(listing, "\n< Function Table >\n");
     printFnTab(listing);
+    fprintf(listing, "\n< Function and Global Variables >\n");
+    printFnAndGlobalTab(listing);
   }
 }
 

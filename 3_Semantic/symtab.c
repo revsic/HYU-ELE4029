@@ -322,3 +322,46 @@ void printFnTab ( FILE * listing )
   stream = listing;
   scope_traverse(globalScope, fn_print_stream);
 }
+
+/* Print function table of given scope. */
+static void fn_and_global_print ( ScopeList list, FILE * listing )
+{ int i, j;
+  if (list == NULL)
+    return;
+  for (i = 0; i < HASHSIZE; ++i)
+  { if (list->bucket[i] != NULL)
+    { BucketList l = list->bucket[i];
+      while (l != NULL)
+      { if (l->type != Function)
+        { l = l->next;
+          continue;
+        }
+        LineList t = l->lines;
+        fprintf(listing, "%-11s  ",l->name);
+        fprintf(listing, "%-9s  ", dbgExpType(l->type));
+        if (l->type == Function)
+          fprintf(listing, "%-11s", dbgExpType(l->fninfo->retn));
+        else
+          fprintf(listing, "%-11s", dbgExpType(l->type));
+        fprintf(listing,"\n");
+        l = l->next;
+      }
+    }
+  }
+}
+
+/* Print function table of given scope,
+ * assume `stream` as parameter implicitly.
+ */
+static void fn_and_global_print_stream(ScopeList list)
+{ fn_and_global_print(list, stream);
+}
+
+/* print function table */
+void printFnAndGlobalTab ( FILE * listing )
+{ fprintf(listing,"  ID Name     ID Type    Data Type \n");
+  fprintf(listing,"-----------  ---------  -----------\n");
+  // implicit parameter setting
+  stream = listing;
+  scope_traverse(globalScope, fn_and_global_print_stream);
+}

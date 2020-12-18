@@ -117,4 +117,7 @@ void printSymTab(FILE * listing);
 /* Print function table. */
 void printFnTab(FILE * listing);
 
+/* Print function and global variables. */
+void printFnAndGlobalTab(FILE * listing);
+
 #endif
