@@ -129,10 +129,11 @@ static void insertNode( TreeNode * t)
           }
           else
           { // insert function
-            st_insert(
+            addr.bucket = st_insert(
               scope_find(scope[scopeidx].name),
               t->attr.name, Function,
               t->lineno, scope[scopeidx].location++);
+            st_appendfn(addr.bucket, t);
             scope_insert(scope[scopeidx].name, t->attr.name);
             // update current scope info
             scopeidx += 1;
@@ -208,13 +209,10 @@ static void insertNode( TreeNode * t)
 /* Initialize states in global scope. */
 static void init_state()
 { // initialize scope
-  global_init();
-  // predefined
-  st_insert(global_scope(), "input", Function, 0, 0);
-  st_insert(global_scope(), "output", Function, 0, 1);
+  int nextloc = global_init();
   // initialize scope block
   scope[0].name = copyString("global");
-  scope[0].location = 2;
+  scope[0].location = nextloc;
   scopeidx = 0;
   fnscope = 0;
 }
@@ -228,6 +226,8 @@ void buildSymtab(TreeNode * syntaxTree)
   if (Error == 0 && TraceAnalyze)
   { fprintf(listing,"\n< Symbol table >\n");
     printSymTab(listing);
+    fprintf(listing, "\n< Function Table >\n");
+    printFnTab(listing);
   }
 }
 
