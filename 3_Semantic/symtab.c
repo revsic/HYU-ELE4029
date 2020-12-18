@@ -217,6 +217,7 @@ void st_appendfn ( BucketList bucket, TreeNode * node )
   }
 }
 
+static int scope_level;
 /* Traverse scope with given callback. */ 
 static void scope_traverse ( ScopeList scope, void (* callback) (ScopeList) )
 { callback(scope);
@@ -225,7 +226,9 @@ static void scope_traverse ( ScopeList scope, void (* callback) (ScopeList) )
     scope_traverse(scope->next, callback);
   // if in children
   if (scope->child != NULL)
+  { scope_level += 1;
     scope_traverse(scope->child, callback);
+  }
 }
 
 /* Print symbol table of given scope. */
@@ -323,7 +326,7 @@ void printFnTab ( FILE * listing )
   scope_traverse(globalScope, fn_print_stream);
 }
 
-/* Print function table of given scope. */
+/* Print function and globals of given scope. */
 static void fn_and_global_print ( ScopeList list, FILE * listing )
 { int i, j;
   if (list == NULL)
@@ -350,18 +353,60 @@ static void fn_and_global_print ( ScopeList list, FILE * listing )
   }
 }
 
-/* Print function table of given scope,
+/* Print function and globals of given scope,
  * assume `stream` as parameter implicitly.
  */
 static void fn_and_global_print_stream(ScopeList list)
 { fn_and_global_print(list, stream);
 }
 
-/* print function table */
+/* print function and globals */
 void printFnAndGlobalTab ( FILE * listing )
 { fprintf(listing,"  ID Name     ID Type    Data Type \n");
   fprintf(listing,"-----------  ---------  -----------\n");
   // implicit parameter setting
   stream = listing;
   scope_traverse(globalScope, fn_and_global_print_stream);
+}
+
+/* Print function parameters and local variables of given scope. */
+static void fnparam_and_local_print ( ScopeList list, FILE * listing )
+{ int i, j;
+  if (list == NULL)
+    return;
+  for (i = 0; i < HASHSIZE; ++i)
+  { if (list->bucket[i] != NULL)
+    { BucketList l = list->bucket[i];
+      while (l != NULL)
+      { if (l->type == Function)
+        { l = l->next;
+          continue;
+        }
+        LineList t = l->lines;
+        fprintf(listing, "%-10s  ",list->name);
+        fprintf(listing, "%-12d  ", scope_level);
+        fprintf(listing, "%-7s  ", l->name);
+        fprintf(listing, "%s", dbgExpType(l->type));
+        fprintf(listing,"\n");
+        l = l->next;
+      }
+    }
+  }
+}
+
+/* Print function parameters and local variables of given scope,
+ * assume `stream` as parameter implicitly.
+ */
+static void fnparam_and_local_print_stream(ScopeList list)
+{ fnparam_and_local_print(list, stream);
+}
+
+/* print function parameters and local variables */
+void printFnParamAndLocals ( FILE * listing )
+{ fprintf(listing,"Scope Name  Nested Level  ID Name  Data Type\n");
+  fprintf(listing,"----------  ------------  -------  ---------\n");
+  // implicit parameter setting
+  stream = listing;
+  scope_level = 0;
+  scope_traverse(globalScope, fnparam_and_local_print_stream);
 }

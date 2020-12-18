@@ -120,4 +120,7 @@ void printFnTab(FILE * listing);
 /* Print function and global variables. */
 void printFnAndGlobalTab(FILE * listing);
 
+/* Print function parameters and local variables */
+void printFnParamAndLocals(FILE * listing);
+
 #endif
