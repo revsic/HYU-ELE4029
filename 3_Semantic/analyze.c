@@ -106,6 +106,7 @@ static void insertNode( TreeNode * t)
       { case ParamK:
           if (t->type == Void)
             break;
+          // fall through
         case VarK:
           if (st_lookup(scope[scopeidx].name, t->attr.name) != 0)
           { Error = TRUE;
@@ -175,6 +176,8 @@ static void insertNode( TreeNode * t)
         case ConstK:
           break;
         case IdK:
+          // fall through
+        case CallK:
           if (st_lookup(scope[scopeidx].name, t->attr.name) == 0)
           { Error = TRUE;
             fprintf(listing, "Error: Undeclared ID \"%s\" at line %d\n",
@@ -184,9 +187,8 @@ static void insertNode( TreeNode * t)
           /* already in table, so ignore location, 
              add line number of use only */ 
             st_insert(scope[scopeidx].name, t->attr.name, t->type,
-              t->lineno, 0);
+              t->lineno, -1);
           break;
-        case CallK:
         case IdxK:
         default:
           break;
