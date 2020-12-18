@@ -13,6 +13,9 @@
  */
 void printToken( TokenType, const char* );
 
+/* Convert expression type to string */
+const char * dbgExpType(ExpType);
+
 /* Procedure printExpType prints a type
  */
 void printExpType(ExpType);

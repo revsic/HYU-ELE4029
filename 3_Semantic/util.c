@@ -61,23 +61,26 @@ void printToken( TokenType token, const char* tokenString )
   }
 }
 
+
+/* Make expression type as string for printing. */
+const char * dbgExpType(ExpType token)
+{ switch(token)
+  { case Void:
+      return "void";
+    case Integer:
+      return "int";
+    case Boolean:
+      return "bool";
+    default:
+      return "unknown";
+  }
+}
+
 /* Procedure printExpType prints a type
  */
 void printExpType(ExpType token)
-{ switch(token)
-  { case Void:
-      fprintf(listing,"void");
-      break;
-    case Integer:
-      fprintf(listing,"int");
-      break;
-    case Boolean:
-      fprintf(listing,"bool");
-      break;
-    default:
-      fprintf(listing,"unknown");
-      break;
-  }
+{ 
+  fprintf(listing, dbgExpType(token));
 }
 
 /* Function newDeclNode creates a new declaration
