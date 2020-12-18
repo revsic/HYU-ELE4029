@@ -104,7 +104,8 @@ static void insertNode( TreeNode * t)
   { case DeclK:
       switch (t->kind.decl)
       { case ParamK:
-          // fall through
+          if (t->type == Void)
+            break;
         case VarK:
           if (st_lookup(scope[scopeidx].name, t->attr.name) != 0)
           { Error = TRUE;
@@ -125,6 +126,7 @@ static void insertNode( TreeNode * t)
           { // insert function
             st_insert(scope[scopeidx].name, t->attr.name, Function,
               t->lineno, scope[scopeidx].location++);
+            scope_insert(scope[scopeidx].name, t->attr.name);
             // update current scope info
             scopeidx += 1;
             scope[scopeidx].name = copyString(t->attr.name);
