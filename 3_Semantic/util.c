@@ -71,6 +71,8 @@ const char * dbgExpType(ExpType token)
       return "int";
     case Boolean:
       return "bool";
+    case Function:
+      return "function";
     default:
       return "unknown";
   }
