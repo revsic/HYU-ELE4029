@@ -67,11 +67,10 @@ typedef struct ScopeListRec
 /* global scope */
 static ScopeList globalScope = NULL;
 
-ScopeList scope_init ( const char * name )
+ScopeList scope_init ( char * name )
 { int i;
-  ScopeList scope = malloc(sizeof(struct ScopeListRec));
-  scope->name = malloc(strlen(name) + 1);
-  strcpy(scope->name, name);
+  ScopeList scope = (ScopeList)malloc(sizeof(struct ScopeListRec));
+  scope->name = copyString(name);
   for (i = 0; i < SIZE; ++i)
     scope->bucket[i] = NULL;
   scope->parent = NULL;
@@ -124,7 +123,7 @@ int st_insert ( char * scope, char * name, ExpType type, int lineno, int loc )
     l = l->next;
   if (l == NULL) /* variable not yet in table */
   { l = (BucketList) malloc(sizeof(struct BucketListRec));
-    l->name = name;
+    l->name = copyString(name);
     l->type = type;
     l->lines = (LineList) malloc(sizeof(struct LineListRec));
     l->lines->lineno = lineno;
@@ -145,7 +144,7 @@ int st_insert ( char * scope, char * name, ExpType type, int lineno, int loc )
 /* Find variable bucket from specified scope. */
 BucketList scope_search ( ScopeList record, char * name )
 { int h = hash(name);
-  BucketList l =  scopeRec->bucket[h];
+  BucketList l =  record->bucket[h];
   while ((l != NULL) && (strcmp(name,l->name) != 0))
     l = l->next;
   return l;
@@ -154,26 +153,30 @@ BucketList scope_search ( ScopeList record, char * name )
 /* Function st_lookup returns the memory 
  * location of a variable or -1 if not found
  */
-Bucketlist st_lookup ( char * scope, char * name )
+int st_lookup ( char * scope, char * name )
 { // find scope
   ScopeList scopeRec = scope_find(scope);
   if (scopeRec == NULL)
-    return NULL;
+    return 0;
   // find variable
   BucketList l;
   while ((l = scope_search(scopeRec, name)) == NULL && scopeRec->parent != NULL)
     scopeRec = scopeRec->parent;
-  return l;
+  if (l == NULL)
+    return 0;
+  return 1;
 }
 
 /* Find ID bucket from specified scope, excluding its parent. */
-BucketList st_lookup_excluding_parent ( char * scope, char * name )
+int st_lookup_excluding_parent ( char * scope, char * name )
 { // find scope
   ScopeList scopeRec = scope_find(scope);
   if (scopeRec == NULL)
     return NULL;
   // find variable
-  return scope_search(scopeRec, name);
+  if (scope_search(scopeRec, name) == NULL)
+    return 0;
+  return 1;
 }
 
 /* Traverse scope with given callback. */ 
@@ -218,7 +221,7 @@ static FILE * stream;
  * assume `stream` as parameter implicitly.
  */
 void scope_print_stream(ScopeList list)
-{ scope_print(list, stream)
+{ scope_print(list, stream);
 }
 
 /* Procedure printSymTab prints a formatted 
