@@ -219,7 +219,7 @@ static void init_state()
 void buildSymtab(TreeNode * syntaxTree)
 { init_state();
   traverse(syntaxTree,insertNode,postInsert);
-  if (TraceAnalyze)
+  if (Error == 0 && TraceAnalyze)
   { fprintf(listing,"\nSymbol table:\n\n");
     printSymTab(listing);
   }
