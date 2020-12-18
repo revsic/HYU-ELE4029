@@ -61,11 +61,11 @@ int global_init ( void )
 { BucketList input, output;
   globalScope = scope_init("global");
   // predefined, method input
-  input = st_insert(global_scope(), "input", Function, 0, 0);
+  input = st_insert(global_scope(), "input", Function, 0, 0, 0);
   input->fninfo = fninfo_init();
   input->fninfo->retn = Integer;
   // predefined, method output
-  output = st_insert(global_scope(), "output", Function, 0, 1);
+  output = st_insert(global_scope(), "output", Function, 0, 0, 1);
   output->fninfo = fninfo_init();
   output->fninfo->retn = Void;
   output->fninfo->numparam = 1;
@@ -168,7 +168,7 @@ SymAddr st_lookup_excluding_parent ( char * scope, char * name )
 /* Procedure st_insert inserts line numbers and
  * memory locations into the symbol table.
  */
-BucketList st_insert ( ScopeList scope, char * name, ExpType type, int lineno, int loc )
+BucketList st_insert ( ScopeList scope, char * name, ExpType type, int size, int lineno, int loc )
 { // find hashtable bucket
   int h = hash(name);
   BucketList l = scope->bucket[h];
@@ -179,6 +179,7 @@ BucketList st_insert ( ScopeList scope, char * name, ExpType type, int lineno, i
   l = (BucketList) malloc(sizeof(struct BucketListRec));
   l->name = copyString(name);
   l->type = type;
+  l->size = size;
   l->lines = (LineList) malloc(sizeof(struct LineListRec));
   l->lines->lineno = lineno;
   l->memloc = loc;

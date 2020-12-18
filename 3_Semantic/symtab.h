@@ -43,6 +43,7 @@ typedef struct
 typedef struct BucketListRec
    { char * name;
      ExpType type;
+     int size; /* for indexibility */
      LineList lines;
      int memloc ; /* memory location for variable */
      FunctionInfo * fninfo;
@@ -100,7 +101,7 @@ SymAddr st_lookup_excluding_parent ( char * scope, char * name );
  * first time, otherwise ignored.
  * Return 1 for success, 0 for scope not found.
  */
-BucketList st_insert( ScopeList scope, char * name, ExpType type, int lineno, int loc );
+BucketList st_insert( ScopeList scope, char * name, ExpType type, int size, int lineno, int loc );
 
 /* Append new line list to the given bucket. */
 void st_appendline ( BucketList bucket, int lineno );
