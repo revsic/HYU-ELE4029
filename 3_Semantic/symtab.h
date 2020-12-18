@@ -14,6 +14,9 @@
 /* HASHSIZE is the size of the hash table */
 #define HASHSIZE 211
 
+/* Maximum number of the parameters */
+#define MAXPARAM 10
+
 /* the list of line numbers of the source 
  * code in which a variable is referenced
  */
@@ -24,10 +27,11 @@ typedef struct LineListRec
 
 typedef struct
   { ExpType retn;
+    int numparam;
     struct {
       ExpType type;
       char * name;
-    } params[10];
+    } params[MAXPARAM];
   } FunctionInfo;
 
 /* The record in the bucket lists for
@@ -64,7 +68,7 @@ typedef struct
 
 /* Procedure for initializing global scope.
  */
-void global_init ( void );
+int global_init ( void );
 
 /* Get global scope.
  */
@@ -96,15 +100,21 @@ SymAddr st_lookup_excluding_parent ( char * scope, char * name );
  * first time, otherwise ignored.
  * Return 1 for success, 0 for scope not found.
  */
-int st_insert( ScopeList scope, char * name, ExpType type, int lineno, int loc );
+BucketList st_insert( ScopeList scope, char * name, ExpType type, int lineno, int loc );
 
 /* Append new line list to the given bucket. */
 void st_appendline ( BucketList bucket, int lineno );
+
+/* Add function infos to bucket */
+void st_appendfn ( BucketList bucket, TreeNode * node );
 
 /* Procedure printSymTab prints a formatted 
  * listing of the symbol table contents 
  * to the listing file
  */
 void printSymTab(FILE * listing);
+
+/* Print function table. */
+void printFnTab(FILE * listing);
 
 #endif
