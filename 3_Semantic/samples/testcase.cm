@@ -267,3 +267,14 @@ void parameternummismatch(void) {
     twoparam(1, 2, 3, 4);
 }
  */
+
+/* 16. compound statement and annonymous scope */
+void compound(void) {
+    int a;
+    {
+        int b;
+        output(a + b);    
+    }
+    /* { int c; output(b + c); } -> undeclared variable */
+    {{int c;}{int d; output(a + d);}}
+}

@@ -69,7 +69,7 @@ static char * annon_scope_name(int lineno)
 #define ANNON_PREFIX "annon_"
 #define ANNON_PREFIX_SIZE 6
 // maximum number of the digits.
-#define ANNON_POSTFIX 5
+#define ANNON_POSTFIX 10
   char * name = (char *)malloc(
     sizeof(char) * (ANNON_PREFIX_SIZE + ANNON_POSTFIX + 1));
   strcpy(name, ANNON_PREFIX);
@@ -77,7 +77,8 @@ static char * annon_scope_name(int lineno)
   { annon_lineno = lineno;
     annon_num = 0;
   }
-  snprintf(name + ANNON_PREFIX_SIZE, ANNON_POSTFIX, "%d", annon_num++);
+  snprintf(name + ANNON_PREFIX_SIZE, ANNON_POSTFIX,
+    "%d_%d", annon_lineno, annon_num++);
   return name;
 }
 
@@ -216,6 +217,7 @@ static void insertNode( TreeNode * t)
   }
 }
 
+#define INIT_LOC 2  // assume INI_LOC = nextloc
 /* Initialize states in global scope. */
 static void init_state()
 { // initialize scope
@@ -266,7 +268,7 @@ static void scopeSetting(TreeNode * t)
           else
           { // update current scope
             scopeidx += 1;
-            scope[scopeidx].name = annon_scope_name(lineno);;
+            scope[scopeidx].name = annon_scope_name(t->lineno);;
             scope[scopeidx].location = 0;
           }
           break;
@@ -436,5 +438,6 @@ static void checkNode(TreeNode * t)
  * by a postorder syntax tree traversal
  */
 void typeCheck(TreeNode * syntaxTree)
-{ traverse(syntaxTree,scopeSetting,checkNode);
+{ init_scope_info(INIT_LOC);
+  traverse(syntaxTree,scopeSetting,checkNode);
 }
