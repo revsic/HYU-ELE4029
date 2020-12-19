@@ -1,0 +1,269 @@
+/* Decl check */
+
+/* 0. baseline
+ */
+int declfn(void) {}
+
+/* 1. named void 
+int namedvoid(void name) {}
+ */
+
+/* 1.1. void after void -> parsing error
+int voidaftervoid(void, void) {}
+ */
+
+/* 1.2. void after named int -> parsing error
+int voidafterint(void, int name)
+ */
+
+/* 2. int after void
+int intafternamedvoid(int name, void vv) {}
+ */
+
+/* 3. void after int
+int namedvoidafterint(void name, int vv) {}
+ */
+
+/* 4. void return function
+ */
+void fnfour(void) {}
+void fnfourbar(int name) {}
+
+/* 5. Redeclared parameter
+void redclparam(int n, int n) {}
+ */
+
+/* 6. array declaration
+ */
+void arraydeclparam(int arr[]) {}
+
+/* 7. Redeclared argument
+void redeclarg(void) {
+    int a;
+    int a;
+}
+ */
+
+/* 8. Negative array decl -> parser error
+void negarrdecl(void) {
+    int b[-10];
+}
+ */
+
+/* 9. Zero array decl
+void zeroarrdecl(void) {
+    int arr[0];
+}
+ */
+
+/* 10. void variable
+void voidvar(void) {
+    void var;
+}
+ */
+
+/* 11. Redeclared function
+void redeclfn(void) {}
+void redeclfn(int num) {}
+ */
+
+/* 12. array variable declaration
+ */
+void arrvardecl(void) {
+    int arr[10];
+}
+
+/* Stmt check */
+
+/* 0. If Baseline
+ */
+int stmtif(void) {
+    if (1) { }
+}
+
+/* 1. If empty condition -> parsing error
+int main(void) {
+    if () {}
+}
+ */
+
+/* 2. If void condition
+int main(void) {
+    if (void) {}
+}
+ */
+
+/* 3. If array condition
+int main(void) {
+    int arr[10];
+    if (arr) {}
+}
+ */
+
+/* 4. While baseline 
+ */
+int stmtwhile(void) {
+    while (1) { }
+}
+
+/* 5. while empty condition -> parsing error
+int main(void) {
+    while () {}
+}
+ */ 
+
+/* 6. while void condition -> parsing error
+int main(void) {
+    while (void) {}
+}
+ */ 
+
+/* 7. while array condition
+int main(void) {
+    int arr[10];
+    while (arr) {}
+}
+ */ 
+
+/* 8. Return baseline - void
+ */
+void returnvoid(void) {
+    return;
+}
+
+/* 8.1. Return baseline - int
+ */
+int returnint(void) {
+    return 1;
+}
+
+/* 9. return int in void function
+void voidbutint(void) {
+    return 1;
+}
+ */
+
+/* 9.1. return none in int function
+int intbutvoid(void) {
+    return;
+}
+ */
+
+/* 10. return on gloabl
+return 10; -> parser error
+ */
+
+
+/* Exp check */
+
+/* 0. OpK baseline
+ */
+int opbaseline(int i) {
+    return i + 10;
+}
+
+/* 1. void op int
+void voidopint(int i) {
+    i = returnvoid() + 10;
+    i = 20 + returnvoid();
+}
+ */
+
+/* 2. operation result on condition
+ */
+void opresultwhile(int i) {
+    while(i > 10) {}
+}
+
+/* 3. ConstK baseline
+ */
+int constopbaseline(void) {
+    while (1) {}
+}
+
+/* 4. Assign baseline
+ */
+int assignbaseline(void) {
+    int i;
+    i = 20;
+    while (i) {}
+}
+
+/* 5. assign to expression -> parsing error
+int assigntoexpr(void) {
+    (1 + 2) = (3 + 4);
+}
+ */
+
+/* 6. assign to function
+int assigntofn(void) {
+    assignbaseline = 10;
+}
+ */
+
+/* 7. assign to array
+int assigntoarray(int i) {
+    int arr[10];
+    arr = i;
+    arr = 10;
+}
+ */
+
+/* 8. type mismatch
+int typemismatch(int i) {
+    i = returnvoid();
+}
+ */
+
+/* 9. assign is expression
+ */
+int assignisexpr(int i) {
+    int j;
+    j = i = 10;
+    i = (j = 10);
+}
+
+/* 10. assign to indexed array
+ */
+int assigntoindexed(int i) {
+    int arr[10];
+    arr[2] = i;
+    arr[i] = i;
+    i = arr[i];
+}
+
+/* 11. assign unindexed variable
+int assignaarray(int i) {
+    int arr[10];
+    i = arr;
+}
+ */
+
+/*  12. index non integer
+void indexnonint(int arr[]) {
+    arr[0] = returnvoid();
+}
+ */
+
+/* 13. call reserved
+ */
+void reserved(int i) {
+    i = input();
+    output(i);
+}
+
+int twoparam(int a, int b, int c) {}
+/* 14. parameter type 
+void parametertypemismatch(void) {
+    int a;
+    output(returnvoid());
+    a = twoparam(1, 2, returnvoid());
+}
+ */ 
+
+/* 15. parameter number mismatch
+void parameternummismatch(void) {
+    twoparam(1, 2);
+    twoparam(1, 2, 3, 4);
+}
+ */
