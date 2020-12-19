@@ -73,6 +73,8 @@ const char * dbgExpType(ExpType token)
       return "bool";
     case Function:
       return "function";
+    case Array:
+      return "array";
     default:
       return "unknown";
   }
