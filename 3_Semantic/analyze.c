@@ -105,6 +105,11 @@ static void typeError(TreeNode * t, char * message)
   Error = TRUE;
 }
 
+static void simpleError(TreeNode * t, char * message)
+{ fprintf(listing, "Error: %s at line %d\n", message, t->lineno);
+  Error = TRUE;
+}
+
 /* Procedure insertNode inserts 
  * identifiers stored in t into 
  * the symbol table 
@@ -123,44 +128,39 @@ static void insertNode( TreeNode * t)
           // fall through
         case VarK:
           if (addr.bucket != 0)
-          { Error = TRUE;
-            fprintf(listing, "Error: Redeclared Variable \"%s\" at line %d\n",
-              t->attr.name, t->lineno);
+          { typeError(t, "redeclared variable");
+            break;
           }
-          else
-            size = -1;
-            if (t->child[0] != NULL)
-            { size = t->child[0]->attr.val;
-              if (size <= 0)
-              { typeError(t, "array size cannot be non-positive");
-                break;
-              }
+          size = -1;
+          if (t->child[0] != NULL)
+          { size = t->child[0]->attr.val;
+            if (t->kind.decl == VarK && size <= 0)
+            { typeError(t, "array size cannot be non-positive");
+              break;
             }
-            st_insert(
-              scope_find(scope[scopeidx].name),
-              t->attr.name, t->type, size,
-              t->lineno, scope[scopeidx].location++);
+          }
+          st_insert(
+            scope_find(scope[scopeidx].name),
+            t->attr.name, t->type, size,
+            t->lineno, scope[scopeidx].location++);
           break;
         case FnK:
           if (addr.bucket != 0)
-          { Error = TRUE;
-            fprintf(listing, "Error: Redeclared function \"%s\" at line %d\n",
-              t->attr.name, t->lineno);
+          { typeError(t, "redeclared function");
+            break;
           }
-          else
-          { // insert function
-            addr.bucket = st_insert(
-              scope_find(scope[scopeidx].name),
-              t->attr.name, Function, -1,
-              t->lineno, scope[scopeidx].location++);
-            st_appendfn(addr.bucket, t);
-            scope_insert(scope[scopeidx].name, t->attr.name);
-            // update current scope info
-            scopeidx += 1;
-            scope[scopeidx].name = copyString(t->attr.name);
-            scope[scopeidx].location = 0;
-            fnscope = 1;
-          }
+          // insert function
+          addr.bucket = st_insert(
+            scope_find(scope[scopeidx].name),
+            t->attr.name, Function, -1,
+            t->lineno, scope[scopeidx].location++);
+          st_appendfn(addr.bucket, t);
+          scope_insert(scope[scopeidx].name, t->attr.name);
+          // update current scope info
+          scopeidx += 1;
+          scope[scopeidx].name = copyString(t->attr.name);
+          scope[scopeidx].location = 0;
+          fnscope = 1;
           break;
         default:
           break;
@@ -200,10 +200,7 @@ static void insertNode( TreeNode * t)
         case CallK:
           addr = st_lookup(scope[scopeidx].name, t->attr.name);
           if (addr.bucket == 0)
-          { Error = TRUE;
-            fprintf(listing, "Error: Undeclared ID \"%s\" at line %d\n",
-              t->attr.name, t->lineno);
-          }
+            typeError(t, "undeclared id");
           else
           /* already in table, so ignore location, 
              add line number of use only */ 
@@ -313,25 +310,26 @@ static void checkNode(TreeNode * t)
       break;
     case ExpK:
       switch (t->kind.exp)
-      { case AssignK:
+      {
+       case AssignK:
           // only expression to variable is assignable
           if (t->child[0]->nodekind != ExpK || t->child[0]->kind.exp != IdK
               || t->child[1]->nodekind != ExpK)
-          { typeError(t, "invalid expression");
+          { simpleError(t, "invalid expression");
             break;
           }
           // cannot assign to function
           if (t->child[0]->type == Function)
-          { typeError(t, "cannot assign to function");
+          { simpleError(t, "cannot assign to function");
             break;
           }
           if (t->child[0]->type == Array)
-          { typeError(t, "cannot assign to array variable");
+          { simpleError(t, "cannot assign to array variable");
             break;
           }
           // only expression of same type is assignable
           if (t->child[0]->type != t->child[1]->type)
-          { typeError(t, "type miss match");
+          { simpleError(t, "type miss match");
             break;
           }
           // assign type
@@ -341,12 +339,15 @@ static void checkNode(TreeNode * t)
           // currently only integer operation is available
           if ((t->child[0]->type != Integer) ||
               (t->child[1]->type != Integer))
-            typeError(t,"operation applied to non-integer");
+          { simpleError(t,"operation applied to non-integer");
+            break;
+          }
           // assume all operation results are integer, no boolean
           t->type = Integer;
           break;
         case ConstK:
-          // Do Nothing
+          // assume that all constant is integer
+          t->type = Integer;
           break;
         case IdK:
           addr = st_lookup(scope[scopeidx].name, t->attr.name);
@@ -367,14 +368,14 @@ static void checkNode(TreeNode * t)
           }
           // check parameter numbers
           if (i != addr.bucket->fninfo->numparam)
-          { typeError(t, "the numbers of the parameters are different");
+          { simpleError(t, "the numbers of the parameters are different");
             break;
           }
           // check param type
           node = t->child[0];
           for (i = 0; i < addr.bucket->fninfo->numparam; ++i)
           { if (addr.bucket->fninfo->params[i].type != node->type)
-            { typeError(t, "parameter type mismatch");
+            { simpleError(t, "parameter type mismatch");
               break;
             }
             node = node->sibling;
@@ -384,7 +385,7 @@ static void checkNode(TreeNode * t)
           break;
         case IdxK:
           if (t->child[0]->type != Integer)
-            typeError(t, "index should be integer");
+            simpleError(t, "index should be integer");
             break;
         default:
           break;
@@ -401,30 +402,25 @@ static void checkNode(TreeNode * t)
           // only integer condition is available
           // on parsing level, empty condition is filtered
           if (t->child[0]->type != Integer)
-            typeError(t->child[0],"if test is not integer");
+            simpleError(t->child[0],"if test is not integer");
           break;
         case WhileK:
           // only integer condition is available
           // on parsing level, empty condition is filtered
           if (t->child[0]->type != Integer)
-            typeError(t->child[0],"while test is not integer");
+            simpleError(t->child[0],"while test is not integer");
           break;
         case ReturnK:
-          // scopidx == 0 -> global scope
-          // return can only be in the function scope
-          if (scopeidx == 0)
-          { typeError(t, "return cannot be occured in global");
-            break;
-          }
           // then scopeidx >= 1 and scope[1] is method scope,
           // since function can be only declared on global scope by parser.
           addr = st_lookup("global", scope[1].name);
           if (t->child[0] == NULL)
-            if (addr.bucket->fninfo->retn != Void)
-              typeError(t, "return nothing on non-void function");
+          { if (addr.bucket->fninfo->retn != Void)
+              simpleError(t, "return nothing on non-void function");
+          }
           // child[0] is not null
           else if (t->child[0]->type != addr.bucket->fninfo->retn)
-            typeError(t, "return type mismatch");
+            simpleError(t, "return type mismatch");
           break;
         default:
           break;
